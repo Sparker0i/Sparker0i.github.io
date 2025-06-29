@@ -9,8 +9,7 @@ from urllib.parse import urlparse
 import requests
 
 export_path = '5cdd04921a7cb8b20267646b-articles.json'
-media_path = 'public/assets/blog'
-posts_path = '_posts'
+posts_path = 'content/post'
 config = {
     'domain': 'https://blog.sparker0i.me',
     'media_url': 'https://blog.sparker0i.me/media',
@@ -28,12 +27,12 @@ export = json.load(open(export_path))
 for post in export['posts']:
     # Create post-specific directory based on slug
     post_slug = post['slug']
-    post_media_dir = f"{media_path}/{post_slug}"
-    os.makedirs(post_media_dir, exist_ok=True)
+    post_dir = f"{posts_path}/{post_slug}"
+    os.makedirs(post_dir, exist_ok=True)
     
     cover_image_basename = f"{post['id']}.png"
-    cover_image_path = f"{post_media_dir}/{cover_image_basename}"
-    post_path = f"{posts_path}/{post_slug}.md"
+    cover_image_path = f"{post_dir}/{cover_image_basename}"
+    post_path = f"{post_dir}/index.md"
 
     if not os.path.isfile(cover_image_path):
         print(post['coverImage'])
@@ -49,7 +48,7 @@ for post in export['posts']:
         img_filename = f"{post['id']}_{os.path.basename(parsed_url.path)}"
         if not img_filename.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
             img_filename += '.jpg'
-        img_path = f"{post_media_dir}/{img_filename}"
+        img_path = f"{post_dir}/{img_filename}"
         
         if not os.path.isfile(img_path):
             try:
@@ -60,8 +59,8 @@ for post in export['posts']:
                 print(f"Failed to download {img_url}: {e}")
                 continue
         
-        # Replace URL in content with relative path (without 'public/')
-        content = content.replace(img_url, f"assets/blog/{post_slug}/{img_filename}")
+        # Replace URL in content with relative path
+        content = content.replace(img_url, img_filename)
         time.sleep(2)
 
     # Fetch tag names dynamically from Hashnode API
@@ -70,19 +69,11 @@ for post in export['posts']:
     
     frontmatter = {
         'title': post['title'],
-        'excerpt': post.get('subtitle', ''),
-        'coverImage': f"assets/blog/{post_slug}/{cover_image_basename}",
+        'description': post.get('subtitle', ''),
+        'image': cover_image_basename,
         'date': post['dateAdded'],
-        'author': {
-            'name': 'Sparker0i',
-            'picture': '/assets/blog/authors/sparker0i.jpeg'
-        },
-        'ogImage': {
-            'url': f"assets/blog/{post_slug}/{cover_image_basename}"
-        },
         'slug': post['slug'],
-        'tags': ', '.join(tag_names),
-        'domain': config['domain'],
+        'tags': tag_names,
     }
     if 'dateUpdated' in post:
         frontmatter['lastmod'] = post['dateUpdated']

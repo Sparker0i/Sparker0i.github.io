@@ -10,7 +10,7 @@
 [[social]]
 identifier = "github"
 name = "GitHub"
-url = "https://github.com/CaiJimmy/hugo-theme-stack"
+url = "https://github.com/Sparker0i"
 
 [social.params]
 icon = "brand-github"
@@ -18,7 +18,31 @@ icon = "brand-github"
 [[social]]
 identifier = "twitter"
 name = "Twitter"
-url = "https://twitter.com"
+url = "https://x.com/Sparker0i"
 
 [social.params]
-icon = "brand-twitter"
+icon = "brand-x"
+
+[[social]]
+identifier = "linkedin"
+name = "LinkedIn"
+url = "https://www.linkedin.com/in/sparker0i"
+
+[social.params]
+icon = "brand-linkedin"
+
+[[social]]
+identifier = "steam"
+name = "Steam"
+url = "https://steamcommunity.com/id/Sparker0i"
+
+[social.params]
+icon = "brand-steam"
+
+[[social]]
+identifier = "xbox"
+name = "Xbox"
+url = "https://www.xbox.com/en-IN/play/user/Sparker0i"
+
+[social.params]
+icon = "brand-xbox"
