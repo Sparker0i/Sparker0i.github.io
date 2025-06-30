@@ -11,7 +11,7 @@ tags:
 - Software Architecture
 categories:
 - Software Architecture
-title: 'Why Every Developer Should Care About Design Patterns: A Deep Dive'
+title: 'Self Contained Systems: Beyond the Monolith vs Microservices debate'
 ---
 
 The Software Architecture landscape has often been dominated by two major choices: monolithic applications for simplicity vs microservices for scalability. This has forced teams to make major architectural calls, often sometimes forcing compromises that don't fully address their needs. However, there may be another path that is gaining traction: Self-Contained Systems (SCS).
