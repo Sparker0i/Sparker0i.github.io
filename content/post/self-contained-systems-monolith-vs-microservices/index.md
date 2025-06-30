@@ -2,7 +2,7 @@
 date: '2025-06-29T08:27:38.006Z'
 description: Exploring Self-Contained Systems as the third path in Modern Software Architecture
 image: scs.jpg
-slug: self-contained-systems-monolith-vs-microservices
+slug: self-contained-systems-alternate-to-monolith-microservices
 tags:
 - Microservices
 - Monolith
