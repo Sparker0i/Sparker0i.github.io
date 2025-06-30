@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Code Smells on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/code-smells/</link><description>Recent content in Code Smells on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 12 May 2025 08:56:26 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/code-smells/index.xml" rel="self" type="application/rss+xml"/><item><title>How to Identify and Refactor Code Smells for Better Code Quality</title><link>https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/</link><pubDate>Mon, 12 May 2025 07:43:20 +0000</pubDate><guid>https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/</guid><description>&lt;img src="https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344.png" alt="Featured image of post How to Identify and Refactor Code Smells for Better Code Quality" />&lt;p>Code is more than just instructions for a machine - it&amp;rsquo;s a form of communication with your future self and teammates. Yet all too often, codebases accumulate hidden &amp;ldquo;stinkers&amp;rdquo; that slow down development, introduce bugs, and frustrate newcomers. These are &lt;strong>code smells&lt;/strong>: surface indicators that something deeper in the design or implementation needs attention. In this post, we&amp;rsquo;ll explore a comprehensive catalog of common smells and walk through concrete refactoring - complete with before/after snippets (in Go, but the logic can be applied to any language)- to help you keep your codebase clean, maintainable, and a joy to work with.&lt;/p>
+&lt;h2 id="why-code-smells-matter">Why Code Smells matter?
+&lt;/h2>&lt;ul>
+&lt;li>&lt;strong>Readability &amp;amp; Onboarding&lt;/strong>: Long, tangled methods or duplicated logic force readers to mentally untangle intent from implementation. New team members spend hours deciphering what should&amp;rsquo;ve been clear.&lt;/li>
+&lt;li>&lt;strong>Bug Rate&lt;/strong>: Smelly code often has hidden dependencies or unexpected side effects. One small change can ripple out, breaking functionality in multiple places.&lt;/li>
+&lt;li>&lt;strong>Confidence to Change&lt;/strong>: When refactoring feels risky, teams delay improvements, leading to technical debt escalation. Over time, even minor enhancements require heroic effort.&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>&lt;strong>Personal Anecdote&lt;/strong>: During the early stages of my career I inherited a 5k line class handling everything from fetching data then transforming it and loading it somewhere. This class was growing exponentially with every sprint/iteration, and soon risked crossing 10k lines. Every change required a full regression suite and lots of manual testing. After identifying just three key smells - Long Method, Feature Envy, and Primitive Obsession - we applied targeted refactorings that reduced that class to under 1000 lines and we were easily able to extend our codebase.&lt;/p>&lt;/blockquote>
+&lt;h2 id="basic-code-smells--refactorings">&lt;strong>Basic Code Smells &amp;amp; Refactorings&lt;/strong>
+&lt;/h2>&lt;h3 id="long-method">Long Method
+&lt;/h3>&lt;p>&lt;strong>What it is:&lt;/strong> A method or function that spans many lines - often 200+ - and tries to do too much: input validation, business logic, data transformation, persistence, side-effects, and user interaction all in one place.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Cognitive Load&lt;/strong>: Readers must keep many moving parts and intents in mind at once.&lt;/li>
+&lt;li>&lt;strong>Hard to Test&lt;/strong>: You can&amp;rsquo;t isolate pieces easily for unit tests.&lt;/li>
+&lt;li>&lt;strong>Change Risk&lt;/strong>: A tweak for one concern can inadvertently break another.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Look for methods longer than a screen.&lt;/li>
+&lt;li>Multiple comments like // validate, // compute, // persist in one block.&lt;/li>
+&lt;li>Deep nesting of conditionals and loops.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>: Use Extract Method&lt;/p>
+&lt;ol>
+&lt;li>Identify a coherent chunk: it does one logical sub-task.&lt;/li>
+&lt;li>Give it a descriptive name.&lt;/li>
+&lt;li>Replace the chunk with a call to the new method.&lt;/li>
+&lt;/ol>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">Checkout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span> &lt;span class="n">Cart&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="mf">1.&lt;/span> &lt;span class="n">Validate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nb">log&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Error&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;empty cart&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="mf">2.&lt;/span> &lt;span class="n">Sum&lt;/span> &lt;span class="n">prices&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sum&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">sum&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Price&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Qty&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="mf">3.&lt;/span> &lt;span class="n">Apply&lt;/span> &lt;span class="n">discount&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">IsVIP&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">sum&lt;/span> &lt;span class="o">*=&lt;/span> &lt;span class="mf">0.9&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="mf">4.&lt;/span> &lt;span class="n">Log&lt;/span> &lt;span class="o">&amp;amp;&lt;/span> &lt;span class="n">persist&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">log&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Total: &lt;/span>&lt;span class="si">%.2f&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">sum&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">db&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Save&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">sum&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="mf">5.&lt;/span> &lt;span class="n">Send&lt;/span> &lt;span class="n">email&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">emailService&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Send&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">sum&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">Checkout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span> &lt;span class="n">Cart&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">err&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">validate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="n">err&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="n">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">log&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Error&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">err&lt;/span>&lt;span class="p">);&lt;/span> &lt;span class="k">return&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">calculateTotal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">applyDiscount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">total&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">finalizeOrder&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">total&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">validate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span> &lt;span class="n">Cart&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">error&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="k">return&lt;/span> &lt;span class="n">fmt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;cart empty&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">calculateTotal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">items&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">applyDiscount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">total&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">c&lt;/span> &lt;span class="n">Customer&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">finalizeOrder&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span> &lt;span class="n">Cart&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">total&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">log&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Total: &lt;/span>&lt;span class="si">%.2f&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">total&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">db&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Save&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">total&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">emailService&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Send&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">cart&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">total&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="duplicated-code">Duplicated Code
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Slivers of nearly identical logic appear in two or more locations - copy-paste programming.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Maintenance Hell&lt;/strong>: Fixing a bug requires updating every copy.&lt;/li>
+&lt;li>&lt;strong>Divergence&lt;/strong>: Over time, copies drift apart, hiding inconsistent behavior.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Search for the same loop, conditional, or calculation in multiple files.&lt;/li>
+&lt;li>In code reviews, ask &amp;ldquo;Have we done this before?&amp;rdquo;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring Options&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Pull shared logic into a single helper function.&lt;/li>
+&lt;li>Replace all occurrences with calls to that helper&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CalculateTaxA&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">order&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">tax&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">item&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">order&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">tax&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Price&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.08&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">tax&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CalculateTaxB&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">invoice&lt;/span> &lt;span class="n">Invoice&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">tax&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">line&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">invoice&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Lines&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">tax&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">line&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">UnitPrice&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">line&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Count&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.08&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">tax&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">calculateTax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">subtotal&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">subtotal&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.08&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CalculateTaxA&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">order&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">subtotal&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">sumPrices&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">order&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">calculateTax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">subtotal&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CalculateTaxB&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">inv&lt;/span> &lt;span class="n">Invoice&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">subtotal&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">sumInvoiceLines&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">inv&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Lines&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">calculateTax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">subtotal&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">//&lt;/span> &lt;span class="n">Shared&lt;/span> &lt;span class="n">helpers&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">sumPrices&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">items&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="n">Item&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">items&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">i&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Price&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">total&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">sumInvoiceLines&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">lines&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="n">Line&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">l&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">lines&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">total&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">l&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">UnitPrice&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">l&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Count&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">total&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="long-parameter-list">Long Parameter List
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Methods that accept many parameters - often over five - making calls verbose and error-prone.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Hard to Remember Order: Callers mix up parameters.&lt;/li>
+&lt;li>&lt;strong>Low Cohesion&lt;/strong>: Signals multiple responsibilities or data clumps.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Method signatures with more than 4 arguments.&lt;/li>
+&lt;li>Frequent use of null or default values to skip parameters.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>: Introduce Parameter Object&lt;/p>
+&lt;ol>
+&lt;li>Identify parameters that form a logical group.&lt;/li>
+&lt;li>Create a class/struct to hold them.&lt;/li>
+&lt;li>Replace the parameter list with the new object.&lt;/li>
+&lt;/ol>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CreateUser&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">firstName&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">lastName&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">email&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">phone&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">role&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">isActive&lt;/span> &lt;span class="ne">bool&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>After:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">CreateUserRequest&lt;/span> &lt;span class="n">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">FirstName&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">LastName&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Email&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Phone&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Role&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">IsActive&lt;/span> &lt;span class="ne">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">CreateUser&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">req&lt;/span> &lt;span class="n">CreateUserRequest&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="divergent-change">Divergent Change
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: A single class or module is edited for many unrelated reasons&amp;ndash;bug fixes, UI tweaks, business-rule updates&amp;ndash;indicating mixed responsibilities.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Fragile&lt;/strong>: Changes for one concern can break another.&lt;/li>
+&lt;li>&lt;strong>Violates SRP&lt;/strong>: Violates the Single Responsibility Principle.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Version-control history shows one file modified by many tickets of different types.&lt;/li>
+&lt;li>Code reviewers comment: &amp;ldquo;Why are we touching this here?&amp;rdquo;&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Identify distinct responsibilities and extract them into new types.&lt;/li>
+&lt;li>Move methods closer to the data they operate on.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before - one class handles both user validation and reporting logic:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">UserService&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">s&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">UserService&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Validate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">error&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">fmt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;email required&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="n">many&lt;/span> &lt;span class="n">more&lt;/span> &lt;span class="n">checks&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">s&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">UserService&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">GenerateReport&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Report&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="n">mixing&lt;/span> &lt;span class="n">data&lt;/span> &lt;span class="n">access&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">formatting&lt;/span>&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">Report&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="o">/*&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="o">*/&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After - split responsibilities into two classes:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">UserValidator&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">v&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">UserValidator&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Validate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">error&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">fmt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Errorf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;email required&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">//&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="n">other&lt;/span> &lt;span class="n">checks&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">UserReportService&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">r&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">UserReportService&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Generate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Report&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">report&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">Report&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="o">/*&lt;/span> &lt;span class="o">...&lt;/span> &lt;span class="n">focused&lt;/span> &lt;span class="n">report&lt;/span> &lt;span class="n">generation&lt;/span>&lt;span class="o">...&lt;/span> &lt;span class="o">*/&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">report&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="feature-envy">Feature Envy
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: A method in one type heavily accesses fields or methods of another type - more than its own - indicating misplaced behavior.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Tight Coupling&lt;/strong>: Class A becomes tightly coupled to B&amp;rsquo;s internals.&lt;/li>
+&lt;li>&lt;strong>Poor Encapsulation&lt;/strong>: Behavior isn&amp;rsquo;t located where the data resides.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A method&amp;rsquo;s code reads like b.getX(), b.getY(), b.computeZ() repeatedly.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Move Method&lt;/strong>: Shift the method into Class B.&lt;/li>
+&lt;li>&lt;strong>Extract Method&lt;/strong>: If only part of the code envies B, extract that fragment into a helper on B.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before - a method in &lt;code>InvoiceService&lt;/code> reaching into &lt;code>Order&lt;/code> internals:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">InvoiceService&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">s&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">InvoiceService&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">TotalWithTax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sum&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">item&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sum&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Price&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">rate&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">State&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TaxRate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">sum&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">rate&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After - move the logic into &lt;code>Order&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">TotalWithTax&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sum&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">item&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="nb">range&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Items&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sum&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Price&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">item&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">sum&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Customer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">State&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TaxRate&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">InvoiceService&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">s&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">InvoiceService&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">TotalWithTax&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TotalWithTax&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="shotgun-surgery">Shotgun Surgery
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: A small change requires edits in many different places - scattered across classes or modules.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Error-Prone&lt;/strong>: Easy to miss one location.&lt;/li>
+&lt;li>&lt;strong>Discourages Change&lt;/strong>: Teams avoid improvements.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>: Search-and-replace touches dozens of files for a single concept.&lt;/p>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Introduce Facade&lt;/strong>: Centralize calls behind one interface.&lt;/li>
+&lt;li>&lt;strong>Move Related Behavior&lt;/strong>: Co-locate methods and data so that a change is&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">OnboardUser&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">data&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">db&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">FetchUserData&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">processed&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">processor&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Process&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">notifier&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SendWelcome&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">processed&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Summary&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">OnboardingFacade&lt;/span> &lt;span class="n">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">DB&lt;/span> &lt;span class="n">Database&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Processor&lt;/span> &lt;span class="n">Processor&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Notifier&lt;/span> &lt;span class="n">Notifier&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">OnboardingFacade&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Onboard&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">data&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DB&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">FetchUserData&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">summary&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Processor&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Process&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Summary&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">f&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Notifier&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SendWelcome&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">userID&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">summary&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">//&lt;/span> &lt;span class="n">Client&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">facade&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">OnboardingFacade&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="n">db&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">processor&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">notifier&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">facade&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Onboard&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;user123&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="primitive-obsession">Primitive Obsession
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Overusing built-in types (String, int, bool) for domain concepts instead of small dedicated classes or value objects.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Scattering of Validation&lt;/strong>: Every user-input string is validated in ad-hoc ways.&lt;/li>
+&lt;li>&lt;strong>Duplication&lt;/strong>: Parsing and formatting logic repeated.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Method signatures full of String parameters representing distinct concepts (e.g., email, phone, address).&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Replace Primitive with Value Object: Create classes like &lt;code>EmailAddress&lt;/code>, &lt;code>PhoneNumber&lt;/code> that encapsulate format checks and domain logic.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">ConvertAmount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">amount&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">fromCurrency&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">toCurrency&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">rate&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">lookupRate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">fromCurrency&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">toCurrency&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">amount&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">rate&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">Currency&lt;/span> &lt;span class="n">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">c&lt;/span> &lt;span class="n">Currency&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">RateTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">other&lt;/span> &lt;span class="n">Currency&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">lookupRate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">c&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">other&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">ConvertAmount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">amount&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">from&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">Currency&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">amount&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">from&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">RateTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">to&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="replace-temp-with-query">Replace Temp with Query
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Temporary variables hold intermediate calculation results, cluttering the method body.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Readability&lt;/strong>: Readers must track variables and their transformations.&lt;/li>
+&lt;li>&lt;strong>Duplication&lt;/strong>: The same calculation might reappear elsewhere.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Sequences like temp = expr; &amp;hellip; use temp; &amp;hellip; modify temp.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Encapsulate the expression in a well-named query method, then call it directly.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">FinalPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">basePrice&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">UnitPrice&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">discount&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="mf">0.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">basePrice&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="mi">1000&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">discount&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">basePrice&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.05&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">basePrice&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">discount&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">FinalPrice&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">calculateBase&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">calculateDiscount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">calculateBase&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Quantity&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">o&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">UnitPrice&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">calculateDiscount&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">Order&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">base&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">calculateBase&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">o&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">base&lt;/span> &lt;span class="o">&amp;gt;&lt;/span> &lt;span class="mi">1000&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">base&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="mf">0.05&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="replace-conditional-with-polymorphism">Replace Conditional with Polymorphism
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Extensive &lt;code>if-else&lt;/code> or &lt;code>switch&lt;/code> blocks that dispatch based on type codes or flags.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Open/Closed Violation&lt;/strong>: Every time you add a new type, you modify the conditional.&lt;/li>
+&lt;li>&lt;strong>Readability&lt;/strong>: Logic spread across a tangled conditional.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Large switch(order.type) { case A:&amp;hellip;; case B:&amp;hellip; } constructs.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Strategy Pattern or Class Hierarchy: Define a common interface and let each subtype implement its behavior.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">SendNotification&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;email&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sendEmail&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;sms&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sendSMS&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Phone&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s2">&amp;#34;push&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sendPush&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DeviceToken&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">Notifier&lt;/span> &lt;span class="n">interface&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">Notify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">EmailNotifier&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">EmailNotifier&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Notify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">sendEmail&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Email&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">SMSNotifier&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">SMSNotifier&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Notify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">sendSMS&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Phone&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">PushNotifier&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">PushNotifier&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">Notify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="n">sendPush&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DeviceToken&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;Hello!&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">var&lt;/span> &lt;span class="n">notifierMap&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">map&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">string&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="n">Notifier&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;email&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">EmailNotifier&lt;/span>&lt;span class="p">{},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;sms&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">SMSNotifier&lt;/span>&lt;span class="p">{},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;push&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">PushNotifier&lt;/span>&lt;span class="p">{},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">SendNotification&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span> &lt;span class="n">User&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">n&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">ok&lt;/span> &lt;span class="p">:&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="n">notifierMap&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">method&lt;/span>&lt;span class="p">];&lt;/span> &lt;span class="n">ok&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">n&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Notify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">u&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="data-clumps">Data Clumps
+&lt;/h3>&lt;p>&lt;strong>What it is&lt;/strong>: Groups of variables that always appear together&amp;ndash;e.g., x, y, z coordinates, street, city, zip.&lt;/p>
+&lt;p>&lt;strong>Why it matters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Duplication&lt;/strong>: Same parameter list repeated.&lt;/li>
+&lt;li>&lt;strong>Cohesion&lt;/strong>: Related data isn&amp;rsquo;t grouped.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>How to spot it&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Method after method accepting the same set of parameters.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Refactoring&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Introduce Parameter Object or Data Class to bundle related fields into one type.&lt;/li>
+&lt;/ul>
+&lt;p>Example: Before&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">DrawLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">y1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">x2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">y2&lt;/span> &lt;span class="n">float64&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">color&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SetStrokeColor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">color&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MoveTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">y1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">LineTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">x2&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">y2&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Stroke&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example: After&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">type&lt;/span> &lt;span class="n">Point&lt;/span> &lt;span class="n">struct&lt;/span>&lt;span class="p">{&lt;/span> &lt;span class="n">X&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Y&lt;/span> &lt;span class="n">float64&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">func&lt;/span> &lt;span class="n">DrawLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p1&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">p2&lt;/span> &lt;span class="n">Point&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">color&lt;/span> &lt;span class="n">string&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SetStrokeColor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">color&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">MoveTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p1&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">X&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">p1&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Y&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">LineTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">p2&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">X&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">p2&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Y&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ctx&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Stroke&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">//&lt;/span> &lt;span class="n">Usage&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">DrawLine&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Point&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">20&lt;/span>&lt;span class="p">},&lt;/span> &lt;span class="n">Point&lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="mi">30&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">40&lt;/span>&lt;span class="p">},&lt;/span> &lt;span class="s2">&amp;#34;red&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="general-refactoring-best-practices">General Refactoring Best Practices
+&lt;/h2>&lt;ol>
+&lt;li>&lt;strong>Test Coverage First&lt;/strong>: Ensure you have reliable unit and integration tests before refactoring.&lt;/li>
+&lt;li>&lt;strong>Tiny, Safe Steps&lt;/strong>: Change one thing at a time; run tests after each change to catch regressions early.&lt;/li>
+&lt;li>&lt;strong>IDE Assistance&lt;/strong>: Leverage built-in refactorings - Extract Method, Rename, Inline - to minimize manual edits.&lt;/li>
+&lt;li>&lt;strong>Code Reviews with Smell Checks&lt;/strong>: Add &amp;ldquo;smell spotting&amp;rdquo; to your review checklist to catch issues collaboratively.&lt;/li>
+&lt;li>&lt;strong>Continuous Refactoring&lt;/strong>: Make cleanup part of your regular workflow and Definition of Done, not a separate &amp;ldquo;cleanup sprint.&amp;rdquo;&lt;/li>
+&lt;/ol>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>Code smells are inevitable, but they need not become insurmountable technical debt. By recognizing these ten patterns and applying targeted refactorings, you&amp;rsquo;ll cultivate a codebase that&amp;rsquo;s more understandable, safer to change, and more enjoyable for your entire team. Start small, build momentum with quick wins like Extract Method, then tackle more advanced refactorings. Your future self (and teammates) will thank you.&lt;/p></description></item></channel></rss>
