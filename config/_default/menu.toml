@@ -38,11 +38,3 @@ url = "https://steamcommunity.com/id/Sparker0i"
 
 [social.params]
 icon = "brand-steam"
-
-[[social]]
-identifier = "xbox"
-name = "Xbox"
-url = "https://www.xbox.com/en-IN/play/user/Sparker0i"
-
-[social.params]
-icon = "brand-xbox"
