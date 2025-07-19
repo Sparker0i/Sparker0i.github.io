@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>NVIDIA on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/nvidia/</link><description>Recent content in NVIDIA on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 14 Apr 2024 17:38:22 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/nvidia/index.xml" rel="self" type="application/rss+xml"/><item><title>How to run Spark 3.0 applications on your GPU</title><link>https://blog.sparker0i.me/run-spark-3-applications-on-gpu/</link><pubDate>Sat, 19 Sep 2020 03:44:00 +0000</pubDate><guid>https://blog.sparker0i.me/run-spark-3-applications-on-gpu/</guid><description>&lt;img src="https://blog.sparker0i.me/run-spark-3-applications-on-gpu/661c08139bb70e9dac2bfee1.png" alt="Featured image of post How to run Spark 3.0 applications on your GPU" />&lt;p>In one of my previous blog posts, I&amp;rsquo;d mentioned that Spark 3.0 is coming with Native GPU support. A few days after that, Spark 3.0 released on 18th June 2020. While it did release, there were no mentions of how to run your Spark 3.0 code on a GPU anywhere on the internet. &lt;strong>It changes now.&lt;/strong>&lt;/p>
+&lt;p>In this post, you&amp;rsquo;ll see the prerequisites for running Spark on GPU on a local machine, as well as all installation instructions.&lt;/p>
+&lt;h2 id="prerequisites">Prerequisites
+&lt;/h2>&lt;p>To run Spark applications on your GPU, it is recommended that you have an &lt;strong>Nvidia GPU&lt;/strong> of &lt;strong>Pascal Architecture&lt;/strong> or better. This means that you will need an &lt;strong>Nvidia Geforce GTX 1050 or better&lt;/strong>. Other requirements are the same as Apache Spark requirements.&lt;/p>
+&lt;p>&lt;em>(PS. I don&amp;rsquo;t have an AMD GPU, so can&amp;rsquo;t really test and confirm whether this will work with it or not, but chances are very slim as you need a tool called&lt;/em> &lt;code>nvidia-smi&lt;/code>, which works only with Nvidia GPUs)&lt;/p>
+&lt;p>You will also need to install &lt;a class="link" href="https://spark.apache.org/downloads.html?ref=localhost" target="_blank" rel="noopener"
+>Apache Spark 3.0&lt;/a>, &lt;a class="link" href="https://developer.nvidia.com/cuda-downloads?ref=localhost" target="_blank" rel="noopener"
+>Nvidia CUDA&lt;/a> on your machine.&lt;/p>
+&lt;p>Other than these, you will also need 2 JARs: &lt;a class="link" href="https://mvnrepository.com/artifact/com.nvidia/rapids-4-spark_2.12?ref=localhost" target="_blank" rel="noopener"
+>Rapids Accelerator&lt;/a> and &lt;a class="link" href="https://repo1.maven.org/maven2/ai/rapids/cudf/0.15/?ref=localhost" target="_blank" rel="noopener"
+>NVIDIA CUDF&lt;/a> (for CUDA 11).&lt;/p>
+&lt;p>You will also need a Linux system to run your jobs. This won&amp;rsquo;t work on Windows as CUDF isn&amp;rsquo;t supported on that platform. However, the CUDF team says they will support CUDA Running on WSL 2.0. To get CUDA Running with WSL, you&amp;rsquo;ll need to be a part of the Windows Insider Program.&lt;/p>
+&lt;p>You will also need a GPU Discovery script which tells the program the addresses of GPUs available on your system. Fortunately, the Spark repo has a &lt;a class="link" href="https://github.com/apache/spark/blob/master/examples/src/main/scripts/getGpusResources.sh?ref=localhost" target="_blank" rel="noopener"
+>GPU discovery script&lt;/a> handy which can be readily used.&lt;/p>
+&lt;h2 id="running">Running
+&lt;/h2>&lt;p>For Spark 3.0 to recognize that you will be running your jobs on a GPU, you need to pass a few parameters as Spark confs:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>spark.rapids.sql.enabled&lt;/code> as &lt;code>true&lt;/code>&lt;/li>
+&lt;li>&lt;code>spark.plugins&lt;/code> as &lt;code>com.nvidia.spark.SQLPlugin&lt;/code>&lt;/li>
+&lt;li>&lt;code>spark.driver.resource.gpu.discoveryScript&lt;/code> as &lt;The location where you have downloaded the GPU discovery script from above>&lt;/li>
+&lt;/ul>
+&lt;p>You can either run this with &lt;code>spark-shell&lt;/code> or you can create your own JAR and run it using &lt;code>spark-submit&lt;/code> and then pass these configurations.&lt;/p>
+&lt;h2 id="performance">Performance
+&lt;/h2>&lt;p>In order to illustrate the performance difference between running your Spark program on a CPU vs GPU, I will be using a very simple program which is very much self explanatory:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-scala" data-lang="scala">&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="n">values&lt;/span>&lt;span class="k">:&lt;/span> &lt;span class="kt">List&lt;/span>&lt;span class="o">[&lt;/span>&lt;span class="kt">Int&lt;/span>&lt;span class="o">]&lt;/span> &lt;span class="k">=&lt;/span> &lt;span class="nc">List&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="mi">100&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">500&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">1000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">5000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">10000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">50000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">100000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">500000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">1000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">5000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">10000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">50000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">100000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">500000000&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="mi">1000000000&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">for&lt;/span> &lt;span class="o">(&lt;/span>&lt;span class="n">upperBound&lt;/span> &lt;span class="k">&amp;lt;-&lt;/span> &lt;span class="n">values&lt;/span>&lt;span class="o">)&lt;/span> &lt;span class="o">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="n">df&lt;/span> &lt;span class="k">=&lt;/span> &lt;span class="n">sc&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">makeRDD&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">upperBound&lt;/span>&lt;span class="o">).&lt;/span>&lt;span class="n">toDF&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="s">&amp;#34;a&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">val&lt;/span> &lt;span class="n">df2&lt;/span> &lt;span class="k">=&lt;/span> &lt;span class="n">sc&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">makeRDD&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="mi">1&lt;/span> &lt;span class="n">to&lt;/span> &lt;span class="n">upperBound&lt;/span>&lt;span class="o">).&lt;/span>&lt;span class="n">toDF&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="s">&amp;#34;b&amp;#34;&lt;/span>&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">println&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="n">df&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">join&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="n">df2&lt;/span>&lt;span class="o">,&lt;/span> &lt;span class="n">$&lt;/span>&lt;span class="s">&amp;#34;a&amp;#34;&lt;/span> &lt;span class="o">===&lt;/span> &lt;span class="n">$&lt;/span>&lt;span class="s">&amp;#34;b&amp;#34;&lt;/span> &lt;span class="o">/&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="o">).&lt;/span>&lt;span class="n">count&lt;/span>&lt;span class="o">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Spark program for testing performance: CPU vs GPU&lt;/p>
+&lt;p>Further, in order to level the playing field between the 2 runs, I&amp;rsquo;m setting certain common configs:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>spark.locality.wait&lt;/code> = &lt;code>0s&lt;/code>&lt;/li>
+&lt;li>&lt;code>spark.driver.memory&lt;/code> = &lt;code>10G&lt;/code>&lt;/li>
+&lt;li>&lt;code>spark.sql.files.maxPartitionBytes&lt;/code> = &lt;code>512 * 1024 * 1024&lt;/code>&lt;/li>
+&lt;li>&lt;code>spark.sql.shuffle.partitions&lt;/code> = &lt;code>10&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>Here are the specs of the laptop which I used to perform this test:&lt;/p>
+&lt;ul>
+&lt;li>6-core Intel Core i7-8750H&lt;/li>
+&lt;li>16GB DDR4 RAM, 256GB NVME SSD&lt;/li>
+&lt;li>8GB Nvidia Geforce RTX 2080 Graphics Card&lt;/li>
+&lt;/ul>
+&lt;p>Here are two plots showing the &lt;code>upperBound&lt;/code> against time taken:&lt;/p>
+&lt;p>chart created with amCharts | amChartschart created with amCharts | amCharts&lt;/p>
+&lt;p>As you can see from the graphs above, for very less records - with sizes within a few Megabytes - it is faster on the CPU than on the GPU because of the less time taken to propagate the results.&lt;/p>
+&lt;p>But things change for the better, when a high volume of records have to start processing. For very high records, you can see a difference of almost 3x.&lt;/p>
+&lt;p>Moreover, for 1000000000 records (the last one), my Spark program crashed when run against the CPU. So the 13 minutes that you see above was until when it was successfully running.&lt;/p>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>To confirm whether your program is running against the GPU or not, you can go to the SQL tab, select your job, and then you will see something like &lt;code>GpuRowToColumnar&lt;/code>, indicating that the job is running against the GPU.&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/run-spark-3-applications-on-gpu/661c08139bb70e9dac2bfee1_874ebbca-5a3f-4902-a421-16112adc8d2f.png"
+width="1920"
+height="1080"
+srcset="https://blog.sparker0i.me/run-spark-3-applications-on-gpu/661c08139bb70e9dac2bfee1_874ebbca-5a3f-4902-a421-16112adc8d2f_hu_354b7185493a6435.png 480w, https://blog.sparker0i.me/run-spark-3-applications-on-gpu/661c08139bb70e9dac2bfee1_874ebbca-5a3f-4902-a421-16112adc8d2f_hu_c7a2c3f618c7e370.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="426px"
+>&lt;/p>
+&lt;p>Spark running on GPU&lt;/p>
+&lt;p>So if you&amp;rsquo;ve got heavy workloads, try and offload them to the GPU as much as you can :)&lt;/p></description></item><item><title>Spark 3.0 adds native GPU integration: Why that matters?</title><link>https://blog.sparker0i.me/spark-3-native-gpu-integration/</link><pubDate>Sat, 16 May 2020 18:01:34 +0000</pubDate><guid>https://blog.sparker0i.me/spark-3-native-gpu-integration/</guid><description>&lt;img src="https://blog.sparker0i.me/spark-3-native-gpu-integration/661c08375610fb416dbc1887.png" alt="Featured image of post Spark 3.0 adds native GPU integration: Why that matters?" />&lt;p>You can soon run your Apache Spark programs natively on your GPU. This became possible thanks to collaboration between Nvidia and Databricks. At the GPU Technology Conference, both the companies have presented a solution that brings GPU Acceleration to Spark 3.0 without major code changes.&lt;/p>
+&lt;h2 id="how-things-were-before">How things were before?
+&lt;/h2>&lt;p>GPU based solutions have existed for Spark for a long time, so what has changed?&lt;/p>
+&lt;p>Such GPU integrations into Spark were provided by either third party libraries in Java/Scala, or you had to depend on Cloud Providers which would provide such an infrastructure to run Spark on GPU. Also, programs would usually be restricted to applications based on Spark ML, thus they generally couldn&amp;rsquo;t be applied to other Big Data uses on Scale.&lt;/p>
+&lt;p>When it comes to Spark/Python, you had to use custom tools like Horovod, which would also end up using popular Python based libraries like Numpy and Tensorflow. Thus, this approach severely limits the performance of the Spark Programs due to the nature of Python, where programs are dynamically interpreted.&lt;/p>
+&lt;p>Don&amp;rsquo;t get me wrong, Python has its very own unique use-cases which Scala doesn&amp;rsquo;t provide (yet), but because Spark was built to do Big Data operations effectively, Python severely restricts the performance.&lt;/p>
+&lt;h2 id="what-happened-now">What happened now?
+&lt;/h2>&lt;p>With the release of Spark 3.0, native GPU based acceleration will be provided within Spark. This acceleration is based on the open source &lt;a class="link" href="https://www.anrdoezrs.net/links/9041660/type/dlg/sid/zd-ad14a02e5d404bd4822065953dda157b--%7Cxid:fr1589641152241fef/https://developer.nvidia.com/rapids?ref=localhost" target="_blank" rel="noopener"
+>RAPIDS&lt;/a> suite of software libraries, Nvidia built on &lt;a class="link" href="https://www.anrdoezrs.net/links/9041660/type/dlg/sid/zd-ad14a02e5d404bd4822065953dda157b--%7Cxid:fr1589641152241dce/https://developer.nvidia.com/machine-learning?ref=localhost" target="_blank" rel="noopener"
+>CUDA-X AI&lt;/a>. This will allow developers to run Spark code without any modifications on GPUs - thereby alleviating load off the CPU.&lt;/p>
+&lt;p>This also benefits Spark SQL and &lt;code>DataFrame&lt;/code> operations, thereby making the GPU acceleration benefits available for non-Machine Learning workloads as well. This will also bring capabilities where we don&amp;rsquo;t have to provision a dedicated Spark Cluster for AI and ML based jobs.&lt;/p>
+&lt;p>In an advanced briefing for members of the press, NVidia CEO Jensen Huang explained that users of Spark clusters on &lt;a class="link" href="https://click.linksynergy.com/deeplink?id=IokOf8qagZo&amp;amp;mid=24542&amp;amp;u1=zd-ad14a02e5d404bd4822065953dda157b--%7Cxid%3Afr1589641152241ghb&amp;amp;murl=https%3A%2F%2Fazure.microsoft.com%2Fservices%2Fmachine-learning%2F&amp;amp;ref=localhost" target="_blank" rel="noopener"
+>Azure Machine Learning&lt;/a> or &lt;a class="link" href="https://aws.amazon.com/sagemaker/?ref=localhost" target="_blank" rel="noopener"
+>Amazon SageMaker&lt;/a> can benefit from the GPU acceleration as well. This means that the infrastructure is already in place, it is now upon other cloud providers to provide the necessary infrastructure, and upon developers to adopt and build their workloads to the new changes.&lt;/p>
+&lt;h2 id="adobe--spark-gpu-acceleration">Adobe + Spark GPU Acceleration
+&lt;/h2>&lt;p>Adobe and Nvidia had signed a &lt;a class="link" href="https://news.adobe.com/news/news-details/2018/Adobe-and-NVIDIA-Announce-Partnership-to-Deliver-New-AI-Services-for-Creativity-and-Digital-Experiences/default.aspx?ref=localhost" target="_blank" rel="noopener"
+>deal&lt;/a> in 2018 where they will utilize Nvidia&amp;rsquo;s AI capabilities for their solutions. Building upon this deal, Adobe has been an early adopter for this new GPU Acceleration on Spark, and they have shown a 7x improvement in performance of their workloads, while saving up to 90% of the costs.&lt;/p>
+&lt;p>These are serious numbers. Imagine, if a company as huge as Adobe is able to bring down costs while improving performance, other companies too can follow suit and we could see Profits and Performance for everyone. Period.&lt;/p>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>Imagine how game changing this can prove to be for the Big Data community overall. No longer will we have to wait for operations to complete when we can utilize the GPU, we have on our local Gaming PCs and laptops. We will also be able to utilize GPU servers on Cloud for Spark without doing major changes.&lt;/p>
+&lt;p>This can also encourage many people to start using Scala for AI and Machine Learning instead of Python. While I do realize that there are no major visualization libraries supporting Spark available in Scala, an encouragement to do machine learning with Spark shall bring more enthusiasm for Scala, due to the disadvantages I mentioned for Python above. This in turn will lead to a growth in the Scala community, which will further result in availability of more and more libraries.&lt;/p>
+&lt;p>For now, there is a Scala visualization library that supports Spark, in active development, which when released to MVN Repository could be a game changer. Head over to &lt;a class="link" href="https://github.com/MarkCLewis/SwiftVis2?ref=localhost" target="_blank" rel="noopener"
+>SwiftViz2&amp;rsquo;s GitHub repo&lt;/a> for more info. You can place safe bets on this one :)&lt;/p>
+&lt;p>In short, this is a win-win situation for everyone involved in this ecosystem.&lt;/p>
+&lt;p>Until another blog post, Ciao.&lt;/p>
+&lt;h2 id="sources">SOURCES
+&lt;/h2>&lt;p>&lt;a class="link" href="https://www.zdnet.com/article/nvidia-and-databricks-announce-gpu-acceleration-for-spark-3-0/?ref=localhost" target="_blank" rel="noopener"
+>ZdNet&lt;/a>, &lt;a class="link" href="https://nvidianews.nvidia.com/news/nvidia-accelerates-apache-spark-worlds-leading-data-analytics-platform?ref=localhost" target="_blank" rel="noopener"
+>Nvidia Newsroom&lt;/a>&lt;/p></description></item></channel></rss>
