@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Containers on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/containers/</link><description>Recent content in Containers on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 29 Jun 2025 08:27:38 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/containers/index.xml" rel="self" type="application/rss+xml"/><item><title>Self Contained Systems: Beyond the Monolith vs Microservices debate</title><link>https://blog.sparker0i.me/self-contained-systems-alternate-to-monolith-microservices/</link><pubDate>Sun, 29 Jun 2025 08:27:38 +0000</pubDate><guid>https://blog.sparker0i.me/self-contained-systems-alternate-to-monolith-microservices/</guid><description>&lt;img src="https://blog.sparker0i.me/self-contained-systems-alternate-to-monolith-microservices/scs.jpg" alt="Featured image of post Self Contained Systems: Beyond the Monolith vs Microservices debate" />&lt;p>The Software Architecture landscape has often been dominated by two major choices: monolithic applications for simplicity vs microservices for scalability. This has forced teams to make major architectural calls, often sometimes forcing compromises that don&amp;rsquo;t fully address their needs. However, there may be another path that is gaining traction: Self-Contained Systems (SCS).&lt;/p>
+&lt;p>Self-Contained Systems represent an architectural pattern that combines the best aspects of both monoliths and microservices while addressing their key limitations. Unlike a typical microservices approach which focuses primarily on decomposing into multiple backend services, SCS embraces a full-stack philosophy where each system/team owns its complete user experience from start to finish.&lt;/p>
+&lt;p>This post will try to examine why SCS might be the sweet spot in your architecture, providing detailed comparison, practical frameworks and real-world insights to guide your architectural decisions.&lt;/p>
+&lt;h2 id="understanding-self-contained-systems">Understanding Self-Contained Systems
+&lt;/h2>&lt;h3 id="defining-self-contained-systems">Defining Self-Contained Systems
+&lt;/h3>&lt;p>A Self-Contained System is an autonomous, full-stack application that:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Owns its complete stack&lt;/strong>: From the database schemas to the user interfaces&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Implements a specific business requirement&lt;/strong>: Focused on a bounded context&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Operates Independently&lt;/strong>: Can function without other systems&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Communicates asynchronously&lt;/strong>: Primarily through events and data replication&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Maintains its own deployment lifecycle&lt;/strong>: Independent versioning and releases&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="core-principles-of-scs">Core Principles of SCS
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Autonomy&lt;/strong>: Each SCS can be developed, tested, deployed and operated independently by a dedicated team. This autonomy extends beyond just the backend services to include the complete user experience.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Business Alignment&lt;/strong>: Systems are organized around business capabilities rather than technical layers. For example, an e-commerce SCS might own everything related to Product catalog - the DB Schemas, business logic, APIs and web pages for browsing and searching through products.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Full-Stack Ownership&lt;/strong>: Unlike microservices that often share frontend applications, each SCS owns its portion of the user interface. This eliminates coordination overhead and enables true end-to-end ownership.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Loose Coupling&lt;/strong>: SCS instances communicate primarily through async mechanisms like events, message queues or data replication. Synchronous calls are minimized as much as possible and carefully managed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Technology diversity&lt;/strong>: Teams can choose the most appropriate tech stack for their specific domain without being constrained by org wide standards.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="scs-vs-traditional-microservices">SCS vs Traditional Microservices
+&lt;/h2>&lt;p>While microservices focus on decomposing the backend into smaller services while often sharing the frontend, SCS takes a more holistic approach, decomposing the entire application stack - including UI - into independent systems.&lt;/p>
+&lt;p>This fundamental difference has profound implications for team structure, development process, and operational complexity.&lt;/p>
+&lt;h2 id="the-monolith-strengths-and-limitations">The Monolith: Strengths and Limitations
+&lt;/h2>&lt;h3 id="monolith-strengths">Monolith Strengths
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Simplicity&lt;/strong>: Monoliths offer simpler development, testing and deployment processes. Developers work within a single codebase with familiar patterns and tools.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Performance&lt;/strong>: In-process communication eliminates network latency. Database transactions can maintain ACID properties across the entire application.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Debugging and Monitoring&lt;/strong>: Centralized logging, monitoring, and debugging provide clear visibility into an application&amp;rsquo;s behaviour.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Consistency&lt;/strong>: Shared Libraries, coding standards and architectural patterns ensure consistency throughout the application.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Initial Development Speed&lt;/strong>: Small teams can move quickly without the overhead of distributed system complexity.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="monolithic-limitations">Monolithic Limitations
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Scalability constraints&lt;/strong>: The entire app must be scaled as a unit, which may lead to resource wasting and scaling bottlenecks if not utilized properly.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Technology Lock-In&lt;/strong>: Since the entire application becomes bound to a single technology stack, it may limit innovation opportunities.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Team Coordination Overhead&lt;/strong>: As teams grow, coordination becomes increasingly complex.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Deployment Risk&lt;/strong>: Changes to any part of the application requires deploying the entire monolith, increasing the blast radius for any potential failures.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Limited Fault Isolation&lt;/strong>: A failure in any single component may bring down the entire application.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="microservices-promise-and-pitfalls">Microservices: Promise and Pitfalls
+&lt;/h2>&lt;h3 id="microservices-strengths">Microservices Strengths
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Independent Scalability&lt;/strong>: Services can be scaled independently based on their specific load patterns and resource requirements.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Technology Diversity&lt;/strong>: Teams can choose the most appropriate tech stack for each service&amp;rsquo;s requirements.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Fault Isolation&lt;/strong>: Failure in one service doesn&amp;rsquo;t necessarily cascade to others, thereby improving overall system resilience.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Team Autonomy&lt;/strong>: Small, focused teams can own and operate individual services with minimal coordination.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>CI/CD&lt;/strong>: Services can be deployed independently, enabling faster release cycles and reduced deployment risk.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="microservices-pitfalls">Microservices Pitfalls
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Operational Complexity&lt;/strong>: Managing dozens or hundreds of services requires sophisticated tooling for deployment, monitoring, logging and debugging. This may end up being difficult to understand, maintain and coordinate.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Network Complexity&lt;/strong>: Service-to-Service communication introduces latency, failure modes and the need for specific design patterns for microservices like circuit breakers and retry/resubmit mechanisms.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Frontend Coordination&lt;/strong>: While backend systems are decomposed, frontends often end up remaining monolithic, creating coordination bottlenecks and deployment dependencies.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Testing Complexity&lt;/strong>: Integration Testing across Multiple Services is significantly more complex than testing a single application.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Distributed System Fallacies&lt;/strong>: Teams often underestimate the challenges of distributed systems leading to issues with network reliability, latency and security.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="detailed-architectural-comparison">Detailed Architectural Comparison
+&lt;/h2>&lt;h3 id="development-complexity">Development Complexity
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Monolith&lt;/strong>: Low complexity for small teams and simple applications. Complexity increases dramatically as the codebase grows.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Microservices&lt;/strong>: High Complexity from day 1. Requires expertise in distributed systems, container orchestration and service discovery.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>SCS&lt;/strong>: Moderate Complexity. More complex than Monoliths but significantly less complex than fine-grained microservices. Complexity remains manageable as the system grows.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="operational-overhead">Operational Overhead
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Monolith&lt;/strong>: Minimal operational overhead. Single deployment, monitoring and logging.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Microservices&lt;/strong>: High operational overhead. Requires sophisticated tooling for container orchestration, service mesh, distributed tracing and centralized logging.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>SCS&lt;/strong>: Moderate operational Overhead. Fewer systems to manage than microservices, while also providing better isolation than monoliths.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="technology-flexibility">Technology Flexibility
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Monolith&lt;/strong>: Limited to a single stack across the entire application&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Microservices&lt;/strong>: Maximum technology flexibility, but can lead to operational complexity and knowledge fragmentation.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>SCS&lt;/strong>: Good technology flexibility with natural boundaries.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="scalability-patterns">Scalability Patterns
+&lt;/h3>&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Monolith&lt;/strong>: Scales the entire application as a unit. Simple, but potentially wasteful blocking up resources it doesn&amp;rsquo;t need.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Microservices&lt;/strong>: Fine grained scalability for individual services. Highly Optimized, but complex.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>SCS&lt;/strong>: Coarse grained scalability for business capabilities. Good balance between simplicity and optimization.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="decision-matrix-to-pick-between-the-styles">Decision Matrix to pick between the styles
+&lt;/h2>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Factor&lt;/th>
+&lt;th>Monolith&lt;/th>
+&lt;th>Microservices&lt;/th>
+&lt;th>SCS&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>Domain Complexity&lt;/td>
+&lt;td>Simple&lt;/td>
+&lt;td>Complex&lt;/td>
+&lt;td>Moderate&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Scalability Requirements&lt;/td>
+&lt;td>Low-Medium&lt;/td>
+&lt;td>Extremely High&lt;/td>
+&lt;td>Medium-High&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Time to Market&lt;/td>
+&lt;td>Fast&lt;/td>
+&lt;td>Slow&lt;/td>
+&lt;td>Medium&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Technology Diversity&lt;/td>
+&lt;td>None&lt;/td>
+&lt;td>Maximum&lt;/td>
+&lt;td>High&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Development Speed&lt;/td>
+&lt;td>Initially Fast&lt;/td>
+&lt;td>Slow&lt;/td>
+&lt;td>Medium&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Testing/Debugging Complexity&lt;/td>
+&lt;td>Low&lt;/td>
+&lt;td>High&lt;/td>
+&lt;td>Medium&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Deployment Complexity&lt;/td>
+&lt;td>Low&lt;/td>
+&lt;td>High&lt;/td>
+&lt;td>Medium&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Fault Isolation&lt;/td>
+&lt;td>Poor&lt;/td>
+&lt;td>Excellent&lt;/td>
+&lt;td>Good&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>Learning Curve&lt;/td>
+&lt;td>Low&lt;/td>
+&lt;td>High&lt;/td>
+&lt;td>Medium&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h2 id="real-world-examples">Real World Examples
+&lt;/h2>&lt;h3 id="zalando">Zalando
+&lt;/h3>&lt;p>Zalando re-architected its e-commerce platform around autonomous teams and micro-frontends, stitching UI fragments together via their Project Mosaic framework. Each feature team deploys independent UI blocks backed by dedicated services and data stores, accelerating experiments and reducing cross-team impacts.&lt;/p>
+&lt;p>&lt;a class="link" href="https://kubernetes.io/case-studies/zalando/" target="_blank" rel="noopener"
+>Link 1&lt;/a>, &lt;a class="link" href="https://engineering.zalando.com/posts/2021/03/micro-frontends-part1.html" target="_blank" rel="noopener"
+>Link 2&lt;/a>&lt;/p>
+&lt;h3 id="breuninger">Breuninger
+&lt;/h3>&lt;p>Breuninger is a leading German fashion and lifestyle retailer with a strong online presence. The company needed to optimize its e-commerce platform to respond more quickly to market demands and customer expectations. Hence they adopted SCS architecture, which allowed independent and rapid development and deployment of new features tailored to the customer journey. This approach improved time-to-market for new features, increased platform stability, and enhanced customer satisfaction through a more optimized shopping experience.&lt;/p>
+&lt;p>&lt;a class="link" href="https://www.innoq.com/en/cases/ecommerce-breuninger/" target="_blank" rel="noopener"
+>Link&lt;/a>&lt;/p>
+&lt;h3 id="kühnenagel">Kühne+Nagel
+&lt;/h3>&lt;p>Kühne+Nagel is a global logistics company. The company needed to break down its monolithic software to improve agility and maintainability. Kühne+Nagel adopted SCS (within the context of logistics), comparing it to microservices and choosing SCS for its clearer boundaries and team ownership. The transition enabled more independent team operations and simplified the management of complex logistics workflows. SCS offered a practical alternative to both monoliths and microservices for large, distributed organizations.&lt;/p>
+&lt;p>&lt;a class="link" href="https://www.elastic.io/integration-best-practices/breaking-down-monolith-microservices-and-self-contained-systems/" target="_blank" rel="noopener"
+>Link&lt;/a>&lt;/p>
+&lt;h3 id="a-personal-anecdote">A Personal Anecdote
+&lt;/h3>&lt;p>In my previous role, I had the opportunity to work closely with a team that developed a comprehensive &lt;a class="link" href="https://www.ibm.com/case-studies/ibm-cio-sales-incentive-systems" target="_blank" rel="noopener"
+>PaaS offering&lt;/a> from scratch - a product that exemplified the SCS principles in action. The platform consisted of three very distinct Self-Contained Systems, each addressing a specific business capability. All three systems had their own tech stack for frontend (2x React, 1x Angular), backend (2x Go, 1x Python) and database (2x MongoDB, 1x DB2) integrated with a central authentication API (Go+MongoDB) that handled user login and session management. However, each of these SCS independently managed authorization within their respective areas using the principles of RBAC.&lt;/p>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>Self-Contained Systems offer a compelling alternative to the traditional monolith versus microservices debate. By focusing on business-aligned, full-stack ownership, SCS provides many of the benefits of microservices while avoiding much of their complexity.&lt;/p>
+&lt;p>The key insights for architectural decision-making are:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Start with Team Structure: Organize your architecture around how you want to organize your teams. SCS works best when teams can own complete business capabilities.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Embrace Business Alignment: Technical boundaries should reflect business boundaries. This makes systems easier to understand, maintain, and evolve.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Balance Complexity: SCS provides a sweet spot between monolithic simplicity and microservices flexibility. Choose the approach that matches your organization&amp;rsquo;s current capabilities and growth trajectory.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Focus on Autonomy: The primary benefit of SCS is team autonomy. Optimize for reducing coordination overhead while maintaining necessary integration points.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Evolve Gradually: Architecture is not a destination but a journey. Start with what works for your current situation and evolve as your organization and requirements change.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>The future of software architecture likely includes all three approaches - monoliths for simple applications, fine-grained microservices for high-scale optimization, and Self-Contained Systems for the vast middle ground where most applications live. Understanding when and how to apply each approach is the key to successful software architecture in the modern era.&lt;/p>
+&lt;p>As we continue to learn from industry experiences and evolve our understanding of distributed systems, Self-Contained Systems represent a mature approach to organizing software that aligns technical and business concerns while maintaining manageable complexity. For many organizations, SCS may indeed be the architectural pattern they&amp;rsquo;ve been searching for.&lt;/p></description></item><item><title>How to use Devcontainers to create apps with x86 architecture on an Apple Silicon Mac</title><link>https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/</link><pubDate>Tue, 09 Apr 2024 15:51:58 +0000</pubDate><guid>https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/</guid><description>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf.png" alt="Featured image of post How to use Devcontainers to create apps with x86 architecture on an Apple Silicon Mac" />&lt;p>&lt;em>UPDATE 25th June 2024: Modified the article to include podman alongside colima.&lt;/em>&lt;/p>
+&lt;p>Apps are a significant part of our lives today. There are various apps you might be using today. On a smartphone, you would be using WhatsApp, Snapchat, Instagram, YouTube and various other apps. On a PC/laptop, you would be using a browser, game launchers to start your favorite games and IDEs to develop applications.&lt;/p>
+&lt;p>Many websites you know and love are apps themselves. As an example, the Facebook website is written using the React framework and packaged as a Web application to run in a browser. YouTube and various other websites by Google are written in the Angular framework and packaged as web apps too.&lt;/p>
+&lt;p>To develop any kind of major applications, you would need a PC or a laptop and an IDE installed. There are various kinds of IDEs available based on the programming language and the kind of application you are developing. You would also need various libraries to create your application - lest write the code yourself. Which leads to the problem I&amp;rsquo;ll be tackling in today&amp;rsquo;s post.&lt;/p>
+&lt;h2 id="background">Background
+&lt;/h2>&lt;p>PCs and laptops sold today run on x86 architecture CPUs made by Intel and AMD. However in recent times, we have started to see a lot of laptops being sold with the CPUs using ARM architecture, which until recently was found only in mobile phones. Not only are these CPUs way more battery efficient, they also allow to wake a laptop from sleep a lot quicker than x86 based laptops. Most notable ARM based laptops are manufactured by Apple, which use the Apple Silicon chips - M1, M2, M3 etc.&lt;/p>
+&lt;p>Like I&amp;rsquo;ve explained before when you are looking to build an application, you&amp;rsquo;d need various libraries to write code. Most libraries in the various programming languages are universal, ie. they are compatible to run on the architecture of your machine&amp;rsquo;s CPU. However, there are some libraries which do not run (yet) on an ARM machine.&lt;/p>
+&lt;p>The most notable culprit for this is the &lt;a class="link" href="https://www.npmjs.com/package/ibm_db?ref=localhost" target="_blank" rel="noopener"
+>ibm_db&lt;/a> library on Node. If you try to install that package on your Apple Silicon mac, you will see this error:&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632.jpeg"
+width="2000"
+height="212"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632_hu_702f32f70657ac3d.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632_hu_7545e4898176640b.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="943"
+data-flex-basis="2264px"
+>&lt;/p>
+&lt;p>Error installing ibm_db directly on the Apple Silicon MacBook&lt;/p>
+&lt;p>Yup, it suggests to install the x64 version of NodeJS and then use the package. I had so many other NodeJS applications on my machine without ibm_db which were working pretty well, so I did not want to install an inefficient version of NodeJS for my machine. But I also had to work on this important project on the M1 mac for my org. I was in a dilemma. Enter &lt;strong>devcontainers&lt;/strong>:&lt;/p>
+&lt;h2 id="devcontainers">Devcontainers
+&lt;/h2>&lt;p>From its website, A devcontainer allows you to use a container as a full-featured development environment. It can be used to run an application, to separate tools, libraries, or runtimes needed for working with a codebase, and to aid in continuous integration and testing.&lt;/p>
+&lt;p>This is very similar to how Python&amp;rsquo;s venv (Virtual Environments) work. Usually, all Python developers need that to do any basic development. But one key difference with devcontainers is that it opens your project folder inside a Docker container, and then any packages you install in the devcontainer remains inside that and does not cross over to your host machine.&lt;/p>
+&lt;p>While the devcontainer spec is Open source and available independently, Visual Studio Code provides an easy way (UI) of doing stuff with it. Using devcontainers, I&amp;rsquo;ll be trying to run my NodeJS app with the ibm_db dependency on my MacBook with Apple Silicon.&lt;/p>
+&lt;h2 id="create-the-virtual-machine">Create the Virtual Machine
+&lt;/h2>&lt;p>Docker - or for that matter any of the open source containerization software - cannot run as is on a machine without a Linux Kernel. You&amp;rsquo;ll need a Linux virtual machine that acts as the place where all your containers will be run. The simplest solution to do this is to create a VM using &lt;a class="link" href="https://github.com/abiosoft/colima?ref=localhost" target="_blank" rel="noopener"
+>Colima&lt;/a> or &lt;a class="link" href="https://podman.io" target="_blank" rel="noopener"
+>Podman&lt;/a>.&lt;/p>
+&lt;p>Here is the command to create a machine using Colima:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">colima start --cpu &lt;span class="m">2&lt;/span> --memory &lt;span class="m">4&lt;/span> --disk &lt;span class="m">50&lt;/span> --arch aarch64 --vm-type&lt;span class="o">=&lt;/span>vz --mount-type&lt;span class="o">=&lt;/span>virtiofs --vz-rosetta --very-verbose
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>The CPU, Memory and Disk parameters should be very obvious here.&lt;/li>
+&lt;li>&lt;code>--very-verbose&lt;/code> is to see more detailed logging while the VM starts. It is useful to debug if anything is going wrong or not.&lt;/li>
+&lt;li>&lt;code>--arch aarch64&lt;/code> tells the Lima CLI to create the VM with the ARM64 architecture. You cannot directly create an x86 machine on an ARM MacBook just like that. The next two options will help enable what I want to do.&lt;/li>
+&lt;li>&lt;code>--vm-type=vz&lt;/code> will use the new MacOS &lt;a class="link" href="https://developer.apple.com/documentation/virtualization?language=objc&amp;amp;ref=localhost" target="_blank" rel="noopener"
+>Virtualization API&lt;/a> to create the VMs.&lt;/li>
+&lt;li>&lt;code>--vz-rosetta&lt;/code> will use Rosetta translation layer when interacting with the VM.&lt;/li>
+&lt;li>&lt;code>--mount-type=virtiofs&lt;/code> creates a VM with the virtiofs volume driver. This allows you to share files from your host machine inside the Container.&lt;/li>
+&lt;/ul>
+&lt;p>Using the VZ APIs along with the virtiofs mount enables better performance running the VM.&lt;/p>
+&lt;p>As of Podman 5.1, Rosetta translation layer is supported by default. If you have been using Podman for your other projects but holding back to the emulation issues, you may start using it instead of colima. Here is the command to create and start a similar VM for Podman:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">podman machine init --cpus&lt;span class="o">=&lt;/span>&lt;span class="m">2&lt;/span> --memory&lt;span class="o">=&lt;/span>&lt;span class="m">2048&lt;/span> --disk-size&lt;span class="o">=&lt;/span>&lt;span class="m">50&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">podman machine start
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>It doesn&amp;rsquo;t matter what option you choose, any further steps from hereon are independent of your choice of Containerization Framework.&lt;/p>
+&lt;h2 id="create-base-image-for-the-container">Create base image for the Container
+&lt;/h2>&lt;p>Devcontainer runs your code inside a Docker container. The basic principle of running a Docker Container requires you to have a base image on top of which any operations can be performed.&lt;/p>
+&lt;p>In this case I want to develop a NodeJS app which utilizes the ibm_db library. So I will need a base image with NodeJS installed. Thankfully, Microsoft provides base Docker images that work well with devcontainers inside VS Code. I&amp;rsquo;ll be using a base image which comes with NodeJS 20 installed.&lt;/p>
+&lt;p>To create the base image I will use in my application, I will need to SSH into the Virtual Machine using the command and then create the base image from there. If you try to create the base image from your host terminal, the image gets created with the ARM architecture, which is not helpful for us as we want the image with an x86 architecture.&lt;/p>
+&lt;p>This is the &lt;code>Dockerfile&lt;/code> I will be using:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> --platform=linux/amd64 mcr.microsoft.com/devcontainers/typescript-node:20-bookworm &lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">RUN&lt;/span> uname -a&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Dockerfile contents&lt;/p>
+&lt;p>To create the image, run the following commands:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;code>colima ssh&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>export DOCKER_DEFAULT_PLATFORM=linux/amd64&lt;/code>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Command to build image:&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>docker build --no-cache --platform linux/amd64 --progress plain -t node20-amd64-localhost:latest .&lt;/code> (For Colima)&lt;/li>
+&lt;li>&lt;code>podman build --no-cache --platform linux/amd64 --progress plain -t node20-amd64-localhost:latest .&lt;/code> (For Podman)&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;code>exit&lt;/code>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>Once you build this image, you should see the output like below for the &lt;code>uname&lt;/code> command. If you don&amp;rsquo;t see the &lt;code>x86_64&lt;/code> like I&amp;rsquo;ve highlighted, then you might have not followed the guide properly:&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630.jpeg"
+width="1544"
+height="116"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630_hu_5d64eda0e3526b12.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630_hu_3541994a93088819.jpeg 1024w"
+loading="lazy"
+alt="Output from Colima VM"
+class="gallery-image"
+data-flex-grow="1331"
+data-flex-basis="3194px"
+>&lt;/p>
+&lt;p>&lt;em>PS: If you are using Podman and had a Podman VM created before installing v5.1, you may have to delete that VM and create another one in its place&lt;/em> &lt;em>&lt;strong>if you don&amp;rsquo;t see x86_64&lt;/strong>&lt;/em> &lt;em>as highlighted above. That will ensure that any new VMs created will have Rosetta translation layer by default.&lt;/em>&lt;/p>
+&lt;h2 id="run-your-project-inside-a-devcontainer">Run your project inside a Devcontainer
+&lt;/h2>&lt;p>I won&amp;rsquo;t be using any sample project for this article, as you may use any of your x86 based projects you wish to emulate inside a Devcontainer. To do that, you will need to create a folder called &lt;code>.devcontainer&lt;/code>, inside which you need to have two files: &lt;code>devcontainer.json&lt;/code> and &lt;code>Dockerfile&lt;/code>.&lt;/p>
+&lt;p>The contents of the &lt;code>Dockerfile&lt;/code> is a single line which uses the base image that we had built in one of the previous sections:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> --platform=linux/amd64 node20-amd64-localhost:latest&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The &lt;code>devcontainer.json&lt;/code> would contain the following contents (Please do not copy the comments as is, it is only meant to explain what each line does:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-json" data-lang="json">&lt;span class="line">&lt;span class="cl">&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;name&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;NodeJS with Typescript installed to build angular apps using x86-only libraries&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;dockerfile&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;Dockerfile&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;runArgs&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="s2">&amp;#34;-v&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s2">&amp;#34;${localWorkspaceFolder}:/workspace:cached&amp;#34;&lt;/span>&lt;span class="p">],&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;customizations&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;vscode&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;extensions&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;ms-azuretools.vscode-docker&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">},&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;remoteUser&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;root&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;#34;forwardPorts&amp;#34;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="mi">3000&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In line 4, &lt;code>${localWorkspaceFolder}&lt;/code> refers to your project&amp;rsquo;s location on the host machine, &lt;code>/workspace&lt;/code> is where your project files be mounted inside the devcontainer and the &lt;code>:cached&lt;/code> option is used to improve performance in Docker when mounting volumes.&lt;/p>
+&lt;p>I want to use the user &lt;code>root&lt;/code> inside my devcontainer so that I don&amp;rsquo;t need to do a &lt;code>sudo&lt;/code> everytime to install an npm package inside the container. I&amp;rsquo;m forwarding the port 3000 from my container to my host machine as my NodeJS express app uses that port to listen onto requests.&lt;/p>
+&lt;p>Once you are done with these two files, open your project inside VSCode, then install the &lt;a class="link" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers&amp;amp;ref=localhost" target="_blank" rel="noopener"
+>Devcontainers&lt;/a> extension, Reload the window, press Cmd+Shift+P and then type &lt;code>Reopen in Container&lt;/code> and click on that option. This will build your Container image, mount your project and make it available inside &lt;code>/workspace&lt;/code> in the container and then you should be able to emulate projects using x86 libraries inside the devcontainer on your machine.&lt;/p>
+&lt;p>To test that it works, I will try to install the &lt;code>ibm_db&lt;/code> package from within the container, and here&amp;rsquo;s how that went:&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468.jpeg"
+width="1212"
+height="452"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468_hu_4396c3ad44e6766b.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468_hu_9e1f87fa77a9adfd.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="268"
+data-flex-basis="643px"
+>&lt;/p>
+&lt;p>That went nicely. Now I need to run my app and see whether it is able to connect to my Database using this library or not:&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c.jpeg"
+width="1320"
+height="228"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c_hu_e9d9cf43596a800f.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c_hu_4686045eae16777c.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="578"
+data-flex-basis="1389px"
+>&lt;/p>
+&lt;p>Yup it did connect well.&lt;/p>
+&lt;h3 id="why-am-i-using-colima">Why am I using Colima
+&lt;/h3>&lt;p>Colima has support for emulating x86 based VMs using the Rosetta 2 translation layer on Apple Silicon Macs. This is important as we needed ibm_db to work. I also think that building x86 images on ARM platforms will become common, as soon as ARM based laptops from Apple and others start becoming mainstream.&lt;/p>
+&lt;p>Moreover, I&amp;rsquo;ve not yet found another easier way to create and run a Docker machine using CLI commands. Of course there&amp;rsquo;s Docker Desktop which gives a nice GUI, but its &lt;a class="link" href="https://www.docker.com/blog/updating-product-subscriptions/?ref=localhost" target="_blank" rel="noopener"
+>license change&lt;/a> in 2022 wrecked havoc on many companies. Our org had to ban the installs of Docker Desktop completely. I have had to migrate to Podman &lt;a class="link" href="https://blog.sparker0i.me/podman-best-docker-alternative/?ref=localhost" target="_blank" rel="noopener"
+>in the past&lt;/a> due to this. &lt;del>While it was fun, it didn&amp;rsquo;t help me solve my problem. Which brings us to:&lt;/del> Podman v5.1 now supports the Rosetta translation layer.&lt;/p>
+&lt;h3 id="why-not-qemu">Why not QEMU?
+&lt;/h3>&lt;p>I did try using QEMU based emulation by typing &lt;code>colima start --arch x86_64 -p qemu&lt;/code> but, While that worked okay, as in it started the container and I was able to run my app, I discovered that for my NodeJS based application it wasn&amp;rsquo;t really as efficient. Also, my M1 MacBook was heating up like it hadn&amp;rsquo;t done ever before. What is the point of having an M1 Mac if it&amp;rsquo;s going to behave the same as the Intel ones. Thus I felt using Rosetta based emulation was better for me.&lt;/p>
+&lt;h3 id="colima-vs-podman">Colima vs Podman
+&lt;/h3>&lt;p>I&amp;rsquo;ve updated the blog post in June 2024 with the instructions for Podman as well. Thus a performance comparison between both options was also needed. In real world performance on your Apple Silicon based machine, you will not notice any difference between using your projects with a Docker VM (through Colima) or a Podman VM.&lt;/p>
+&lt;p>If you have a keen eye though, you&amp;rsquo;d notice that operations with Podman did finish 1-2s faster than on Colima. Even building the first &lt;code>node20-amd64&lt;/code> image on Podman took 2s lesser than that on Colima, despite using the same internet for both. If I were to make a guess, it could be due to one peculiar output I noticed when creating the first image on the Podman VM.&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0.jpeg"
+width="1598"
+height="92"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0_hu_66f484125ea574d9.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0_hu_b28c58af807dfc44.jpeg 1024w"
+loading="lazy"
+alt="Output from Podman VM"
+class="gallery-image"
+data-flex-grow="1736"
+data-flex-basis="4168px"
+>&lt;/p>
+&lt;p>Here I can see two things: &lt;code>SMP&lt;/code> and &lt;code>PREEMPT_DYNAMIC&lt;/code>, which were not available when I created the VM inside Colima. With a simple Google Search, I found &lt;a class="link" href="https://learn.farizizwan.com/infrastructure/system-administration-linux/redhat-derivatives/smp-preempt_dynamic-definitions" target="_blank" rel="noopener"
+>this website&lt;/a> which helped explain both these things. In a nutshell, a combination of both those strings allows you to utilize resources better while providing better responsiveness.&lt;/p>
+&lt;h3 id="how-about-windows">How about Windows?
+&lt;/h3>&lt;p>While ARM based Windows laptops are set to make a debut later in 2024, I don&amp;rsquo;t believe there will be too much to be done to get it to work. There&amp;rsquo;s WSL which exists already, and one has to watch out how the x86 emulation plays out on these ARM machines using the Snapdragon X chips. If that ends up like how Rosetta has played out so far, all we&amp;rsquo;ll need is for WSL and its distros to support doing the same as well. Things are not yet clear on that front, and I will try to update my article as soon as the picture is clear.&lt;/p>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>Right now I&amp;rsquo;ve just shown one example where I had to run an NodeJS app with x86 libraries on an M1 based Mac without spinning up a full fledged VM like inside VirtualBox or VMWare. You can also extend this concept to various other languages having x86-only libraries like Python etc.&lt;/p></description></item><item><title>Podman with Desktop Companion: The best alternative to Docker Desktop</title><link>https://blog.sparker0i.me/podman-best-docker-alternative/</link><pubDate>Sun, 03 Apr 2022 11:31:44 +0000</pubDate><guid>https://blog.sparker0i.me/podman-best-docker-alternative/</guid><description>&lt;img src="https://blog.sparker0i.me/podman-best-docker-alternative/661c08015ae500253ce7927c.png" alt="Featured image of post Podman with Desktop Companion: The best alternative to Docker Desktop" />&lt;h2 id="update">UPDATE
+&lt;/h2>&lt;p>Ever since I wrote this article, the team behind Podman has released and improved their &lt;a class="link" href="https://podman-desktop.io/" target="_blank" rel="noopener"
+>Podman Desktop&lt;/a> offering. This product improves upon Podman Desktop Companion and provides integration with other features from RedHat like Podman AI Lab, Code Ready Containers (OpenShift) within the app. I&amp;rsquo;d highly recommend to check that out instead.&lt;/p>
+&lt;p>Containers and Docker have always been synonymous to the ears since eternity. For most of us, Docker has been the go-to tool for containerization - a way to pack a software application and all dependencies into an image that can be run anywhere. This allows application to remain separate from the infrastructure so that the app works regardless of where it runs.&lt;/p>
+&lt;p>While working on multiple applications in my company, I had been using Docker Desktop as my containerization platform of choice, on my company provided MacBooks to build and debug application images. But we were dealt with a blow a few months ago when it was announced that effective January 31st 2022, Docker Desktop will &lt;a class="link" href="https://www.docker.com/blog/updating-product-subscriptions/?ref=localhost" target="_blank" rel="noopener"
+>require a license for enterprises&lt;/a> with more than 250 employees. Unfortunately, my company IBM fell into Docker&amp;rsquo;s categorization of an enterprise.&lt;/p>
+&lt;p>Naturally, I started looking at all available alternatives, given that Docker desktop annual subscription per user costs $250. Unfortunately there was no clear winner which could replicate everything that Docker Desktop could do - GUI support, Built in Kubernetes, Environments, Integration with IDEs etc. But all I needed was something with which I could build images locally in a secure manner and run containers locally, with an optional support of a GUI.&lt;/p>
+&lt;p>Enter:&lt;/p>
+&lt;h2 id="podman">Podman
+&lt;/h2>&lt;p>Podman is a CLI tool that provides a Docker-compatible API. It is open source and published by Red Hat. The biggest advantage over Docker is that it is a Daemonless container engine which runs the containers in a rootless state by default. This brings in additional security layer, because even if the container engine, runtime or the orchestrator is compromized, the attacker won&amp;rsquo;t gain any root privileges on the host - which is a flaw in Docker&amp;rsquo;s architecture. You can read &lt;a class="link" href="https://www.imaginarycloud.com/blog/podman-vs-docker?ref=localhost" target="_blank" rel="noopener"
+>this article&lt;/a> to understand the finer points of difference between Docker and Podman.&lt;/p>
+&lt;p>Installation of Podman 4 is fairly simple on MacOS (using brew). Unfortunately for Linux based Operating Systems, only Fedora has an unofficial COPR that allows you to install Podman 4, while for other Operating Systems you have to build from source code in order to install podman 4.&lt;/p>
+&lt;p>Once you install the podman binary, all you need to do is execute the below two commands for MacOS:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">podman machine init
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">podman machine start
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This will start a Fedora CoreOS based VM in the background having podman installed. Once you have started this Podman VM, Almost all Docker CLI commands are compatible with Podman as well - &lt;code>run&lt;/code>, &lt;code>exec&lt;/code>, &lt;code>push&lt;/code> etc. It brings zero impact to the developers that operate on CLI - how you build images and whatever you do with that image using the Docker CLI remains the same. You can also add &lt;a class="link" href="https://podman.io/whatis.html?ref=localhost" target="_blank" rel="noopener"
+>&lt;code>alias docker=podman&lt;/code>&lt;/a> to &lt;code>~/.zshrc&lt;/code> (MacOS) or &lt;code>~/.bash_profile&lt;/code> (Linux) so that you don&amp;rsquo;t need to keep reminding yourself to use podman instead of Docker.&lt;/p>
+&lt;p>The CLI route is easy for users who have been working with Docker CLI. However what about those users who have been primarily using the Docker Desktop GUI for their workflows? Enter:&lt;/p>
+&lt;h2 id="podman-desktop-companion">Podman Desktop Companion
+&lt;/h2>&lt;p>&lt;a class="link" href="https://iongion.github.io/podman-desktop-companion/?ref=localhost" target="_blank" rel="noopener"
+>Podman Desktop Companion&lt;/a> is a third-party app, which is an almost adequate drop-in replacement for the Docker Desktop GUI. Since this is not an official app, there are a few features this app lacks, most notably the absence of Kubernetes - though this won&amp;rsquo;t be a big deal for those who only want the containerization features of Podman. Here&amp;rsquo;s a screenshot of the app running on my MacBook:&lt;/p>
+&lt;p>&lt;img src="https://blog.sparker0i.me/podman-best-docker-alternative/661c08015ae500253ce7927c_bc163f7c-0948-4378-ab5b-f995df78a27b.png"
+width="2000"
+height="1549"
+srcset="https://blog.sparker0i.me/podman-best-docker-alternative/661c08015ae500253ce7927c_bc163f7c-0948-4378-ab5b-f995df78a27b_hu_b1f1fddd7e055e2c.png 480w, https://blog.sparker0i.me/podman-best-docker-alternative/661c08015ae500253ce7927c_bc163f7c-0948-4378-ab5b-f995df78a27b_hu_b9e3b99ec09f51fd.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="129"
+data-flex-basis="309px"
+>&lt;/p>
+&lt;p>Podman Desktop Companion makes you feel right at home with the look and feel of Docker Desktop&lt;/p>
+&lt;p>Feels familiar, doesn&amp;rsquo;t it? Unfortunately, the process to install this app is not as straightforward. For a MacBook, you will need to install &lt;code>lima-vm&lt;/code>, an app that launches Linux virtual machines with automatic file sharing and port forwarding - very similar to what WSL2 does, just that it is mostly for MacOS but can also be used on various Linux distros as well. Unfortunately if you want to proceed to the next step, you will have to stop the &lt;code>podman machine&lt;/code> you had created earlier.&lt;/p>
+&lt;p>Lima offers the ability to create VMs using their sample YAML templates or by supplying user written YAML. When you create a VM with the Podman Template YAML, the VM will be running Podman v3. This lacks some key features from Podman 4 including Volume and Device mounts, as well as a vastly improved Network stack. Thus you will have to use a custom YAML if you want to install Podman 4.&lt;/p>
+&lt;p>You need to ensure that the name of this VM is &lt;code>podman&lt;/code>. This is necessary for the Desktop Companion (This dependency on a specific VM name is a bad programming practice on the part of the Desktop Companion creator, but since this is a Beta version we can forgive them for now until they release a stable version). You can do this by running &lt;code>limactl start --name=podman /location/of/the/yaml/from/below&lt;/code>. To make things easier for you, I&amp;rsquo;ve written a YAML that worked well for me. You need to save this to a location and use the location of this YAML in the command above.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">images&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">location&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;https://download.fedoraproject.org/pub/fedora/linux/releases/35/Cloud/x86_64/images/Fedora-Cloud-Base-35-1.2.x86_64.qcow2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">arch&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;x86_64&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">digest&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;sha256:fe84502779b3477284a8d4c86731f642ca10dd3984d2b5eccdf82630a9ca2de6&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">location&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;https://download.fedoraproject.org/pub/fedora/linux/releases/35/Cloud/aarch64/images/Fedora-Cloud-Base-35-1.2.aarch64.qcow2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">arch&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;aarch64&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">digest&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;sha256:c71f2e6ce75b516d565e2c297ea9994c69b946cb3eaa0a4bbea400dbd6f59ae6&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">cpus&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">4&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">memory&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">8&lt;/span> &lt;span class="n">GiB&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">disk&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">50&lt;/span> &lt;span class="n">GiB&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">mounts&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">location&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;~&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">location&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;/tmp/lima&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">writable&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="bp">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">containerd&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">system&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="bp">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">user&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="bp">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">provision&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">mode&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">system&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">script&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">dnf&lt;/span> &lt;span class="n">copr&lt;/span> &lt;span class="n">enable&lt;/span> &lt;span class="n">rhcontainerbot&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">podman4&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">y&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">dnf&lt;/span> &lt;span class="n">update&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">dnf&lt;/span> &lt;span class="n">install&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">y&lt;/span> &lt;span class="n">podman&lt;/span> &lt;span class="n">crun&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">mode&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">user&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">script&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">set&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">eux&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">pipefail&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">systemctl&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">user&lt;/span> &lt;span class="n">enable&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">now&lt;/span> &lt;span class="n">podman&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">socket&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">probes&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">script&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">#!/bin/bash&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">set&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">eux&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">o&lt;/span> &lt;span class="n">pipefail&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="o">!&lt;/span> &lt;span class="n">timeout&lt;/span> &lt;span class="mi">30&lt;/span>&lt;span class="n">s&lt;/span> &lt;span class="n">bash&lt;/span> &lt;span class="o">-&lt;/span>&lt;span class="n">c&lt;/span> &lt;span class="s2">&amp;#34;until command -v podman &amp;gt;/dev/null 2&amp;gt;&amp;amp;1; do sleep 3; done&amp;#34;&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">then&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">echo&lt;/span> &lt;span class="o">&amp;gt;&amp;amp;&lt;/span>&lt;span class="mi">2&lt;/span> &lt;span class="s2">&amp;#34;podman is not installed yet&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">exit&lt;/span> &lt;span class="mi">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">fi&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">hint&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">See&lt;/span> &lt;span class="s2">&amp;#34;/var/log/cloud-init-output.log&amp;#34;&lt;/span>&lt;span class="o">.&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">the&lt;/span> &lt;span class="n">guest&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">portForwards&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">-&lt;/span> &lt;span class="n">guestSocket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;/run/user/{{.UID}}/podman/podman.sock&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">hostSocket&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s2">&amp;#34;{{.Dir}}/sock/podman.sock&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">message&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="o">|&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">To&lt;/span> &lt;span class="n">run&lt;/span> &lt;span class="err">`&lt;/span>&lt;span class="n">podman&lt;/span>&lt;span class="err">`&lt;/span> &lt;span class="n">on&lt;/span> &lt;span class="n">the&lt;/span> &lt;span class="n">host&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">assumes&lt;/span> &lt;span class="n">podman&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">remote&lt;/span> &lt;span class="n">is&lt;/span> &lt;span class="n">installed&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="n">run&lt;/span> &lt;span class="n">the&lt;/span> &lt;span class="n">following&lt;/span> &lt;span class="n">commands&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">------&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">export&lt;/span> &lt;span class="n">CONTAINER_HOST&lt;/span>&lt;span class="o">=$&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">limactl&lt;/span> &lt;span class="n">list&lt;/span> &lt;span class="n">podman&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">format&lt;/span> &lt;span class="s1">&amp;#39;unix://{{.Dir}}/sock/podman.sock&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">podman&lt;/span> &lt;span class="n">system&lt;/span> &lt;span class="n">connection&lt;/span> &lt;span class="n">add&lt;/span> &lt;span class="n">lima&lt;/span> &lt;span class="s2">&amp;#34;unix://{{.Dir}}/sock/podman.sock&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">podman&lt;/span> &lt;span class="n">system&lt;/span> &lt;span class="n">connection&lt;/span> &lt;span class="n">default&lt;/span> &lt;span class="n">lima&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">podman&lt;/span>&lt;span class="p">{{&lt;/span>&lt;span class="k">if&lt;/span> &lt;span class="n">eq&lt;/span> &lt;span class="o">.&lt;/span>&lt;span class="n">HostOS&lt;/span> &lt;span class="s2">&amp;#34;linux&amp;#34;&lt;/span>&lt;span class="p">}}&lt;/span> &lt;span class="o">--&lt;/span>&lt;span class="n">remote&lt;/span>&lt;span class="p">{{&lt;/span>&lt;span class="n">end&lt;/span>&lt;span class="p">}}&lt;/span> &lt;span class="n">run&lt;/span> &lt;span class="n">quay&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">io&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">podman&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">hello&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">------&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>I&amp;rsquo;m using a Fedora Base VM Image because there is a custom COPR available which can install Podman v4 in the VM image. Then once I&amp;rsquo;m done installing Podman and crun on the VM, I&amp;rsquo;m forwarding the VM&amp;rsquo;s socket to a socket on the host machine. This is needed so for the Desktop companion to establish connection and verify services running on the guest VM.&lt;/p>
+&lt;p>Once the VM is installed and started, you also need 4 other commands on the host to notify the podman remote CLI to connect to the guest VM rather than listening on the host. Thus once you are done installing Lima, Podman Remote CLI on Host, Podman on Lima VM and the Desktop Companion, you will feel right at home, without missing Docker Desktop.&lt;/p></description></item></channel></rss>
