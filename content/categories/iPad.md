@@ -4,6 +4,6 @@ description: Fr
 
 # Badge style
 style:
-    background: "#5d9700ff"
-    color: "#fff"
+    background: "#c4e433ff"
+    color: "#000000ff"
 ---
