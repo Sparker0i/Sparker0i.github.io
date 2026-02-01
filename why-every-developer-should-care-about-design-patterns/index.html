@@ -1,0 +1,624 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Imagine you&rsquo;re building furniture. You could design each piece from scratch, figuring out how legs connect to tabletops or how drawers slide in and out. Or, you could use tried-and-tested blueprints that woodworkers have refined over generations.\nIn software development, design patterns are these blueprints. They represent elegant solutions to common coding problems that developers have encountered repeatedly over decades. And whether you&rsquo;re just starting your coding journey or you&rsquo;re a seasoned developer, understanding these patterns can dramatically improve your programming skills.\n"><title>Why Every Developer Should Care About Design Patterns: A Deep Dive</title><link rel=canonical href=https://blog.sparker0i.me/why-every-developer-should-care-about-design-patterns/><link rel=stylesheet href=/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css><meta property='og:title' content="Why Every Developer Should Care About Design Patterns: A Deep Dive"><meta property='og:description' content="Imagine you&rsquo;re building furniture. You could design each piece from scratch, figuring out how legs connect to tabletops or how drawers slide in and out. Or, you could use tried-and-tested blueprints that woodworkers have refined over generations.\nIn software development, design patterns are these blueprints. They represent elegant solutions to common coding problems that developers have encountered repeatedly over decades. And whether you&rsquo;re just starting your coding journey or you&rsquo;re a seasoned developer, understanding these patterns can dramatically improve your programming skills.\n"><meta property='og:url' content='https://blog.sparker0i.me/why-every-developer-should-care-about-design-patterns/'><meta property='og:site_name' content="Sparker0i's Blog"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Development'><meta property='article:tag' content='Design Patterns'><meta property='article:tag' content='Clean Code'><meta property='article:published_time' content='2025-03-08T08:02:38+00:00'><meta property='article:modified_time' content='2025-03-08T20:40:39+00:00'><meta property='og:image' content='https://blog.sparker0i.me/why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca.png'><meta name=twitter:title content="Why Every Developer Should Care About Design Patterns: A Deep Dive"><meta name=twitter:description content="Imagine you&rsquo;re building furniture. You could design each piece from scratch, figuring out how legs connect to tabletops or how drawers slide in and out. Or, you could use tried-and-tested blueprints that woodworkers have refined over generations.\nIn software development, design patterns are these blueprints. They represent elegant solutions to common coding problems that developers have encountered repeatedly over decades. And whether you&rsquo;re just starting your coding journey or you&rsquo;re a seasoned developer, understanding these patterns can dramatically improve your programming skills.\n"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://blog.sparker0i.me/why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca.png'><link rel="shortcut icon" href=/favicon.png><script async src="https://www.googletagmanager.com/gtag/js?id=G-B20G7JM0X8"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-B20G7JM0X8")}</script></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/sparker0i_hu_693dc16bb266ace6.jpg width=300 height=301 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>😎</span></figure><div class=site-meta><h1 class=site-name><a href=/>Sparker0i's Blog</a></h1><h2 class=site-description>I blog about coding, tech, AI, cricket and other personal hobbies too.</h2></div></header><ol class=menu-social><li><a href=https://github.com/Sparker0i target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/sparker0i target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://steamcommunity.com/id/Sparker0i target=_blank title=Steam rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5.0 11-.653 8.953L11.5 16.962V17a3 3 0 01-2.824 3H8.5a3 3 0 01-2.94-2.402L3 16.5V13l3.51 1.755a2.989 2.989.0 012.834-.635l2.727-3.818A4.5 4.5.0 0116.5 5z"/><circle cx="16.5" cy="9.5" r="1" fill="currentColor"/></svg></a></li><li><a href=https://x.com/Sparker0i target=_blank title=Twitter rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4l11.733 16H20L8.267 4z"/><path d="M4 20l6.768-6.768m2.46-2.46L20 4"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#what-are-design-patterns-really>What Are Design Patterns, Really?</a></li><li><a href=#the-three-categories-of-design-patterns>The Three Categories of Design Patterns</a><ol><li><a href=#1-creational-patterns>1. Creational Patterns</a></li><li><a href=#2-structural-patterns>2. Structural Patterns</a></li><li><a href=#3-behavioral-patterns>3. Behavioral Patterns</a></li></ol></li><li><a href=#why-should-beginners-care-about-design-patterns>Why Should Beginners Care About Design Patterns?</a><ol><li><a href=#1-they-teach-you-how-to-think-about-code-structure>1. They Teach You How to Think About Code Structure</a></li><li><a href=#2-they-help-you-write-more-professional-code-faster>2. They Help You Write More Professional Code Faster</a></li><li><a href=#3-they-improve-collaboration>3. They Improve Collaboration</a></li><li><a href=#4-they-prepare-you-for-framework-learning>4. They Prepare You for Framework Learning</a></li><li><a href=#5-they-prevent-common-mistakes>5. They Prevent Common Mistakes</a></li></ol></li><li><a href=#design-patterns-in-real-world-applications>Design Patterns in Real-World Applications</a><ol><li><a href=#in-web-development>In Web Development</a></li><li><a href=#in-mobile-apps>In Mobile Apps</a></li><li><a href=#in-everyday-applications>In Everyday Applications</a></li></ol></li><li><a href=#common-misunderstandings-about-design-patterns>Common Misunderstandings About Design Patterns</a><ol><li><a href=#misunderstanding-1-design-patterns-are-too-complex-for-beginners>Misunderstanding #1: &ldquo;Design Patterns Are Too Complex for Beginners&rdquo;</a></li><li><a href=#misunderstanding-2-i-should-use-design-patterns-everywhere>Misunderstanding #2: &ldquo;I Should Use Design Patterns Everywhere&rdquo;</a></li><li><a href=#misunderstanding-3-design-patterns-are-outdated>Misunderstanding #3: &ldquo;Design Patterns Are Outdated&rdquo;</a></li></ol></li><li><a href=#how-to-start-learning-design-patterns>How to Start Learning Design Patterns</a><ol><li><a href=#1-start-with-real-problems>1. Start with Real Problems</a></li><li><a href=#2-learn-through-examples>2. Learn Through Examples</a></li><li><a href=#3-practice-implementation>3. Practice Implementation</a></li><li><a href=#4-refactor-existing-code>4. Refactor Existing Code</a></li><li><a href=#5-learn-patterns-in-groups>5. Learn Patterns in Groups</a></li></ol></li><li><a href=#a-deeper-look-at-five-essential-patterns-for-beginners>A Deeper Look at Five Essential Patterns for Beginners</a><ol><li><a href=#1-singleton-pattern>1. Singleton Pattern</a></li><li><a href=#2-strategy-pattern>2. Strategy Pattern</a></li><li><a href=#3-observer-pattern>3. Observer Pattern</a></li><li><a href=#4-factory-method-pattern>4. Factory Method Pattern</a></li><li><a href=#5-decorator-pattern>5. Decorator Pattern</a></li></ol></li><li><a href=#design-patterns-and-code-quality>Design Patterns and Code Quality</a><ol><li><a href=#they-promote-the-solid-principles>They Promote the SOLID Principles</a></li><li><a href=#they-reduce-code-duplication>They Reduce Code Duplication</a></li><li><a href=#they-improve-code-maintainability>They Improve Code Maintainability</a></li></ol></li><li><a href=#the-journey-from-pattern-user-to-pattern-creator>The Journey From Pattern User to Pattern Creator</a></li><li><a href=#patterns-as-a-growth-investment>Patterns as a Growth Investment</a></li><li><a href=#additional-resources-for-learning-design-patterns>Additional Resources for Learning Design Patterns</a></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/why-every-developer-should-care-about-design-patterns/><img src=/why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca_hu_30e04a58e93a4872.png srcset="/why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca_hu_30e04a58e93a4872.png 800w, /why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca_hu_c23d8c7c53027522.png 1600w" width=800 height=457 loading=lazy alt="Featured image of post Why Every Developer Should Care About Design Patterns: A Deep Dive"></a></div><div class=article-details><header class=article-category><a href=/categories/clean-code/ style=background-color:#0073c0;color:#fff>Clean Code</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/why-every-developer-should-care-about-design-patterns/>Why Every Developer Should Care About Design Patterns: A Deep Dive</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2025-03-08T08:02:38Z>Mar 08, 2025</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>14 minute read</time></div></footer></div></header><section class=article-content><p>Imagine you&rsquo;re building furniture. You could design each piece from scratch, figuring out how legs connect to tabletops or how drawers slide in and out. Or, you could use tried-and-tested blueprints that woodworkers have refined over generations.</p><p>In software development, design patterns are these blueprints. They represent elegant solutions to common coding problems that developers have encountered repeatedly over decades. And whether you&rsquo;re just starting your coding journey or you&rsquo;re a seasoned developer, understanding these patterns can dramatically improve your programming skills.</p><h2 id=what-are-design-patterns-really>What Are Design Patterns, Really?</h2><p>At their core, design patterns are reusable solutions to problems that occur frequently in software design. Think of them as templates that can be applied to different situations, saving you from reinventing the wheel each time you face a familiar challenge.</p><p>The concept was popularized in 1994 when four authors (often called the &ldquo;Gang of Four&rdquo; or GoF) published the book &ldquo;Design Patterns: Elements of Reusable Object-Oriented Software.&rdquo; This landmark text identified 23 patterns that addressed common problems in object-oriented programming.</p><h2 id=the-three-categories-of-design-patterns>The Three Categories of Design Patterns</h2><p>Design patterns generally fall into three categories, each addressing a different aspect of software design:</p><h3 id=1-creational-patterns>1. Creational Patterns</h3><p>These patterns deal with object creation mechanisms, trying to create objects in a manner suitable to the situation.</p><p><strong>Example: The Factory Pattern</strong></p><p>Imagine you&rsquo;re developing a game with different character types (warrior, mage, archer). Instead of writing code like this everywhere:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>Character</span><span class=w> </span><span class=n>character</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>type</span><span class=p>.</span><span class=na>equals</span><span class=p>(</span><span class=s>&#34;warrior&#34;</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>character</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Warrior</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=k>if</span><span class=p>(</span><span class=n>type</span><span class=p>.</span><span class=na>equals</span><span class=p>(</span><span class=s>&#34;mage&#34;</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>character</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Mage</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=k>if</span><span class=p>(</span><span class=n>type</span><span class=p>.</span><span class=na>equals</span><span class=p>(</span><span class=s>&#34;archer&#34;</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>character</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Archer</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>You could use a Factory pattern:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>Character</span><span class=w> </span><span class=n>character</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>CharacterFactory</span><span class=p>.</span><span class=na>createCharacter</span><span class=p>(</span><span class=n>type</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>The factory handles the complex creation logic, making your code cleaner and more maintainable. If you add a new character type later, you only need to modify the factory, not every place characters are created.</p><h3 id=2-structural-patterns>2. Structural Patterns</h3><p>These patterns focus on how classes and objects are composed to form larger structures.</p><p><strong>Example: The Adapter Pattern</strong></p><p>Imagine you have a new library that tracks user analytics, but its interface doesn&rsquo;t match what your application expects:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=c1>// Your application expects:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>OldAnalytics</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>trackEvent</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>,</span><span class=w> </span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>data</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// But the new library uses:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>NewAnalyticsLibrary</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>logActivity</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>activityName</span><span class=p>,</span><span class=w> </span><span class=n>JSONObject</span><span class=w> </span><span class=n>attributes</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Implementation</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Instead of changing your entire codebase, you can create an adapter:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>class</span> <span class=nc>AnalyticsAdapter</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>OldAnalytics</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>NewAnalyticsLibrary</span><span class=w> </span><span class=n>newAnalytics</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>NewAnalyticsLibrary</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>trackEvent</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>,</span><span class=w> </span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>data</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>JSONObject</span><span class=w> </span><span class=n>json</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>convertMapToJson</span><span class=p>(</span><span class=n>data</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>newAnalytics</span><span class=p>.</span><span class=na>logActivity</span><span class=p>(</span><span class=n>name</span><span class=p>,</span><span class=w> </span><span class=n>json</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>JSONObject</span><span class=w> </span><span class=nf>convertMapToJson</span><span class=p>(</span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>data</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Conversion logic</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>JSONObject</span><span class=p>(</span><span class=n>data</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>Now your existing code works with the new library without modifications!</p><h3 id=3-behavioral-patterns>3. Behavioral Patterns</h3><p>These patterns are concerned with algorithms and the assignment of responsibilities between objects.</p><p><strong>Example: The Observer Pattern</strong></p><p>Think of how social media works: when someone posts an update, all their followers get notified. This is the Observer pattern in action!</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>class</span> <span class=nc>Post</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>User</span><span class=o>&gt;</span><span class=w> </span><span class=n>followers</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ArrayList</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>addFollower</span><span class=p>(</span><span class=n>User</span><span class=w> </span><span class=n>user</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>followers</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>user</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>createUpdate</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>content</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Create the update</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>notifyFollowers</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>notifyFollowers</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=p>(</span><span class=n>User</span><span class=w> </span><span class=n>follower</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>followers</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>follower</span><span class=p>.</span><span class=na>notify</span><span class=p>(</span><span class=s>&#34;New post available!&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>This pattern creates a one-to-many dependency where multiple observers (followers) are notified when the subject (post creator) changes state.</p><h2 id=why-should-beginners-care-about-design-patterns>Why Should Beginners Care About Design Patterns?</h2><p>If you&rsquo;re new to programming, you might wonder if design patterns are relevant to you yet. The answer is a resounding yes, for several important reasons:</p><h3 id=1-they-teach-you-how-to-think-about-code-structure>1. They Teach You How to Think About Code Structure</h3><p>Learning design patterns early helps develop an architectural mindset. Instead of focusing solely on making your code work, you start considering how it&rsquo;s organized and how different components interact.</p><h3 id=2-they-help-you-write-more-professional-code-faster>2. They Help You Write More Professional Code Faster</h3><p>When you recognize common problems, you can apply established solutions rather than struggling through trial and error. This accelerates your development process and results in more robust solutions.</p><h3 id=3-they-improve-collaboration>3. They Improve Collaboration</h3><p>Programming is rarely a solo activity. Using established patterns creates a shared vocabulary with other developers. When you mention using a &ldquo;Factory Method&rdquo; or &ldquo;Observer Pattern,&rdquo; other developers immediately understand your approach.</p><h3 id=4-they-prepare-you-for-framework-learning>4. They Prepare You for Framework Learning</h3><p>Modern frameworks like React, Angular, and Spring incorporate many design patterns. Understanding these patterns makes learning frameworks easier because you recognize the underlying concepts.</p><h3 id=5-they-prevent-common-mistakes>5. They Prevent Common Mistakes</h3><p>Many design patterns evolved specifically to address problems that repeatedly caused bugs or maintenance headaches. Learning these patterns helps you avoid these pitfalls from the start.</p><h2 id=design-patterns-in-real-world-applications>Design Patterns in Real-World Applications</h2><p>Let&rsquo;s look at some examples of how design patterns show up in technologies you might already be using:</p><h3 id=in-web-development>In Web Development</h3><p><strong>React&rsquo;s Component Model:</strong> React uses the Composite pattern, allowing you to build complex UIs from simple components that can contain other components.</p><p><strong>Event Handling in JavaScript:</strong> The Observer pattern is used extensively in event-driven programming, where event listeners &ldquo;observe&rdquo; elements and respond to user interactions.</p><h3 id=in-mobile-apps>In Mobile Apps</h3><p><strong>iOS&rsquo;s Delegation Pattern:</strong> This is a variation of the Observer pattern where objects delegate certain responsibilities to other objects.</p><p><strong>Android&rsquo;s Adapter Views:</strong> These use the Adapter pattern to convert data sources into views that can be displayed in lists.</p><h3 id=in-everyday-applications>In Everyday Applications</h3><p><strong>Word Processors:</strong> The Command pattern powers features like undo/redo, where each action is encapsulated as an object that can be executed, tracked, and reversed.</p><p><strong>Video Games:</strong> The State pattern manages character behaviors, allowing characters to smoothly transition between actions like walking, running, or attacking.</p><h2 id=common-misunderstandings-about-design-patterns>Common Misunderstandings About Design Patterns</h2><p>As you learn about design patterns, be aware of these common misconceptions:</p><h3 id=misunderstanding-1-design-patterns-are-too-complex-for-beginners>Misunderstanding #1: &ldquo;Design Patterns Are Too Complex for Beginners&rdquo;</h3><p><strong>Reality:</strong> While some patterns have complex implementations, the concepts behind them are accessible to beginners. Start with simpler patterns like Factory, Observer, and Strategy.</p><h3 id=misunderstanding-2-i-should-use-design-patterns-everywhere>Misunderstanding #2: &ldquo;I Should Use Design Patterns Everywhere&rdquo;</h3><p><strong>Reality:</strong> Design patterns are tools, not rules. They should be applied when they solve a specific problem, not forced into every situation. Sometimes simple, straightforward code is better.</p><h3 id=misunderstanding-3-design-patterns-are-outdated>Misunderstanding #3: &ldquo;Design Patterns Are Outdated&rdquo;</h3><p><strong>Reality:</strong> While some specific implementations may become less relevant as languages evolve, the core principles behind design patterns remain valuable. Modern languages and frameworks may offer built-in solutions for some patterns, but understanding the patterns helps you use these features more effectively.</p><h2 id=how-to-start-learning-design-patterns>How to Start Learning Design Patterns</h2><p>Ready to dive into design patterns? Here&rsquo;s a beginner-friendly approach:</p><h3 id=1-start-with-real-problems>1. Start with Real Problems</h3><p>Rather than trying to memorize all 23 GoF patterns at once, focus on patterns that solve problems you&rsquo;ve encountered. This makes the learning more relevant and memorable.</p><h3 id=2-learn-through-examples>2. Learn Through Examples</h3><p>Look for concrete examples of patterns in languages you&rsquo;re familiar with. Many online resources provide code samples in different programming languages.</p><h3 id=3-practice-implementation>3. Practice Implementation</h3><p>Try implementing a simple version of each pattern you learn. This hands-on approach helps solidify your understanding.</p><h3 id=4-refactor-existing-code>4. Refactor Existing Code</h3><p>Take some code you&rsquo;ve already written and refactor it using a design pattern. This exercise helps you see the benefits and trade-offs directly.</p><h3 id=5-learn-patterns-in-groups>5. Learn Patterns in Groups</h3><p>Study related patterns together to understand their similarities and differences. For example, learn Factory Method, Abstract Factory, and Builder together to understand different approaches to object creation.</p><h2 id=a-deeper-look-at-five-essential-patterns-for-beginners>A Deeper Look at Five Essential Patterns for Beginners</h2><p>Let&rsquo;s explore five patterns that are particularly valuable for beginners to understand:</p><h3 id=1-singleton-pattern>1. Singleton Pattern</h3><p><strong>Problem it Solves:</strong> Sometimes you need exactly one instance of a class that is accessible globally, like a configuration manager or connection pool.</p><p><strong>How it Works:</strong> The pattern ensures a class has only one instance and provides a global point to access it.</p><p><strong>Example:</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>DatabaseConnection</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>DatabaseConnection</span><span class=w> </span><span class=n>instance</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Private constructor prevents direct instantiation</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=nf>DatabaseConnection</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Initialize connection</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>synchronized</span><span class=w> </span><span class=n>DatabaseConnection</span><span class=w> </span><span class=nf>getInstance</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>instance</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>instance</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>DatabaseConnection</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>instance</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>query</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>sql</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Execute query using the single connection</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Usage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>DatabaseConnection</span><span class=w> </span><span class=n>connection</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>DatabaseConnection</span><span class=p>.</span><span class=na>getInstance</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>connection</span><span class=p>.</span><span class=na>query</span><span class=p>(</span><span class=s>&#34;SELECT * FROM users&#34;</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>When to Use It:</strong> When having multiple instances would cause problems (like multiple file writers trying to access the same file) or waste resources.</p><p><strong>When to Avoid It:</strong> When you need different instances with different configurations or when it introduces unnecessary global state.</p><h3 id=2-strategy-pattern>2. Strategy Pattern</h3><p><strong>Problem it Solves:</strong> You need different variants of an algorithm, but don&rsquo;t want to hardcode all the variants into a single class.</p><p><strong>How it Works:</strong> Define a family of algorithms, encapsulate each one, and make them interchangeable.</p><p><strong>Example:</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=c1>// Strategy interface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>PaymentStrategy</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>pay</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>amount</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete strategies</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>CreditCardPayment</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>PaymentStrategy</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>cardNumber</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>CreditCardPayment</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>cardNumber</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>cardNumber</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>cardNumber</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>pay</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>amount</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>amount</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34; paid with credit card &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>cardNumber</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>PayPalPayment</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>PaymentStrategy</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>email</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>PayPalPayment</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>email</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>email</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>email</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>pay</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>amount</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>amount</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34; paid using PayPal account &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>email</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Context</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>ShoppingCart</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>PaymentStrategy</span><span class=w> </span><span class=n>paymentStrategy</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>setPaymentStrategy</span><span class=p>(</span><span class=n>PaymentStrategy</span><span class=w> </span><span class=n>paymentStrategy</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>paymentStrategy</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>paymentStrategy</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>checkout</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>amount</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>paymentStrategy</span><span class=p>.</span><span class=na>pay</span><span class=p>(</span><span class=n>amount</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Usage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>ShoppingCart</span><span class=w> </span><span class=n>cart</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ShoppingCart</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>cart</span><span class=p>.</span><span class=na>setPaymentStrategy</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>CreditCardPayment</span><span class=p>(</span><span class=s>&#34;1234-5678-9012-3456&#34;</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>cart</span><span class=p>.</span><span class=na>checkout</span><span class=p>(</span><span class=n>100</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>cart</span><span class=p>.</span><span class=na>setPaymentStrategy</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>PayPalPayment</span><span class=p>(</span><span class=s>&#34;user@example.com&#34;</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>cart</span><span class=p>.</span><span class=na>checkout</span><span class=p>(</span><span class=n>200</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>When to Use It:</strong> When you have multiple ways to perform an operation and need to switch between them dynamically.</p><p><strong>When to Avoid It:</strong> When there&rsquo;s only one or two simple variants of an algorithm that aren&rsquo;t likely to change.</p><h3 id=3-observer-pattern>3. Observer Pattern</h3><p><strong>Problem it Solves:</strong> You need many objects to receive updates when another object changes.</p><p><strong>How it Works:</strong> Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified.</p><p><strong>Example:</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=c1>// Subject interface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>Subject</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>addObserver</span><span class=p>(</span><span class=n>Observer</span><span class=w> </span><span class=n>observer</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>removeObserver</span><span class=p>(</span><span class=n>Observer</span><span class=w> </span><span class=n>observer</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>notifyObservers</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Observer interface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>Observer</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>update</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>message</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete subject</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>NewsAgency</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Subject</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>Observer</span><span class=o>&gt;</span><span class=w> </span><span class=n>observers</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ArrayList</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>news</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>addObserver</span><span class=p>(</span><span class=n>Observer</span><span class=w> </span><span class=n>observer</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>observers</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>observer</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>removeObserver</span><span class=p>(</span><span class=n>Observer</span><span class=w> </span><span class=n>observer</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>observers</span><span class=p>.</span><span class=na>remove</span><span class=p>(</span><span class=n>observer</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>notifyObservers</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>Observer</span><span class=w> </span><span class=n>observer</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>observers</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>observer</span><span class=p>.</span><span class=na>update</span><span class=p>(</span><span class=n>news</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>setNews</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>news</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>news</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>news</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>notifyObservers</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete observer</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>NewsChannel</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Observer</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>NewsChannel</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>name</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>name</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>update</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>news</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>name</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34; received news: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>news</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Usage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>NewsAgency</span><span class=w> </span><span class=n>agency</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>NewsAgency</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>NewsChannel</span><span class=w> </span><span class=n>channel1</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>NewsChannel</span><span class=p>(</span><span class=s>&#34;Channel 1&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>NewsChannel</span><span class=w> </span><span class=n>channel2</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>NewsChannel</span><span class=p>(</span><span class=s>&#34;Channel 2&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>agency</span><span class=p>.</span><span class=na>addObserver</span><span class=p>(</span><span class=n>channel1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>agency</span><span class=p>.</span><span class=na>addObserver</span><span class=p>(</span><span class=n>channel2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>agency</span><span class=p>.</span><span class=na>setNews</span><span class=p>(</span><span class=s>&#34;Breaking news: Design patterns are awesome!&#34;</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>When to Use It:</strong> When changes to one object may require changing other objects, and you don&rsquo;t know how many objects need to change.</p><p><strong>When to Avoid It:</strong> When the notification logic becomes too complex or observers need to rely on notifications that might be missed (e.g., if they&rsquo;re temporarily disconnected).</p><h3 id=4-factory-method-pattern>4. Factory Method Pattern</h3><p><strong>Problem it Solves:</strong> You need to create objects, but don&rsquo;t know exactly what type of objects you&rsquo;ll need to create until runtime.</p><p><strong>How it Works:</strong> Define an interface for creating an object, but let subclasses decide which class to instantiate.</p><p><strong>Example:</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=c1>// Product interface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>Vehicle</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>void</span><span class=w> </span><span class=nf>drive</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete products</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>Car</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Vehicle</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>drive</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;Driving a car...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>Motorcycle</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Vehicle</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>drive</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;Riding a motorcycle...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Creator abstract class</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>abstract</span><span class=w> </span><span class=kd>class</span> <span class=nc>VehicleFactory</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>abstract</span><span class=w> </span><span class=n>Vehicle</span><span class=w> </span><span class=nf>createVehicle</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>deliverVehicle</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Vehicle</span><span class=w> </span><span class=n>vehicle</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>createVehicle</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;Delivering the vehicle...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>vehicle</span><span class=p>.</span><span class=na>drive</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete creators</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>CarFactory</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>VehicleFactory</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Vehicle</span><span class=w> </span><span class=nf>createVehicle</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Car</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>MotorcycleFactory</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>VehicleFactory</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Vehicle</span><span class=w> </span><span class=nf>createVehicle</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Motorcycle</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Usage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>VehicleFactory</span><span class=w> </span><span class=n>factory</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>CarFactory</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>factory</span><span class=p>.</span><span class=na>deliverVehicle</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>factory</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>MotorcycleFactory</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>factory</span><span class=p>.</span><span class=na>deliverVehicle</span><span class=p>();</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>When to Use It:</strong> When a class can&rsquo;t anticipate the type of objects it must create, or when a class wants its subclasses to specify the objects it creates.</p><p><strong>When to Avoid It:</strong> When adding new products requires changing the factory interface, which violates the Open/Closed Principle.</p><h3 id=5-decorator-pattern>5. Decorator Pattern</h3><p><strong>Problem it Solves:</strong> You need to add responsibilities to objects dynamically without affecting other objects of the same class.</p><p><strong>How it Works:</strong> Attach additional responsibilities to an object dynamically by placing it inside special wrapper objects.</p><p><strong>Example:</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=c1>// Component interface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>interface</span> <span class=nc>Coffee</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>String</span><span class=w> </span><span class=nf>getDescription</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>double</span><span class=w> </span><span class=nf>cost</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete component</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>SimpleCoffee</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Coffee</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getDescription</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=s>&#34;Simple coffee&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>double</span><span class=w> </span><span class=nf>cost</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>1</span><span class=p>.</span><span class=na>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Decorator abstract class</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>abstract</span><span class=w> </span><span class=kd>class</span> <span class=nc>CoffeeDecorator</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>Coffee</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>protected</span><span class=w> </span><span class=n>Coffee</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>CoffeeDecorator</span><span class=p>(</span><span class=n>Coffee</span><span class=w> </span><span class=n>coffee</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>decoratedCoffee</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>coffee</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getDescription</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>double</span><span class=w> </span><span class=nf>cost</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>cost</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Concrete decorators</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>MilkDecorator</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>CoffeeDecorator</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>MilkDecorator</span><span class=p>(</span><span class=n>Coffee</span><span class=w> </span><span class=n>coffee</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>super</span><span class=p>(</span><span class=n>coffee</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getDescription</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;, milk&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>double</span><span class=w> </span><span class=nf>cost</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>cost</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>0</span><span class=p>.</span><span class=na>5</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>class</span> <span class=nc>SugarDecorator</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>CoffeeDecorator</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>SugarDecorator</span><span class=p>(</span><span class=n>Coffee</span><span class=w> </span><span class=n>coffee</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>super</span><span class=p>(</span><span class=n>coffee</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getDescription</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;, sugar&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>double</span><span class=w> </span><span class=nf>cost</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>decoratedCoffee</span><span class=p>.</span><span class=na>cost</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>0</span><span class=p>.</span><span class=na>2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=c1>// Usage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>Coffee</span><span class=w> </span><span class=n>coffee</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SimpleCoffee</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>coffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;: $&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>coffee</span><span class=p>.</span><span class=na>cost</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>coffee</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>MilkDecorator</span><span class=p>(</span><span class=n>coffee</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>coffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;: $&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>coffee</span><span class=p>.</span><span class=na>cost</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>coffee</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SugarDecorator</span><span class=p>(</span><span class=n>coffee</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>coffee</span><span class=p>.</span><span class=na>getDescription</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;: $&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>coffee</span><span class=p>.</span><span class=na>cost</span><span class=p>());</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>When to Use It:</strong> When you need to add responsibilities to objects dynamically and transparently, without affecting other objects.</p><p><strong>When to Avoid It:</strong> When the component hierarchy becomes too complex with many layers of decorators.</p><h2 id=design-patterns-and-code-quality>Design Patterns and Code Quality</h2><p>Beyond solving specific problems, design patterns contribute to overall code quality in several ways:</p><h3 id=they-promote-the-solid-principles>They Promote the SOLID Principles</h3><p>Many design patterns naturally align with the SOLID principles of object-oriented design:</p><ul><li><strong>Single Responsibility Principle:</strong> Patterns like Decorator and Strategy help separate different responsibilities.</li><li><strong>Open/Closed Principle:</strong> Patterns like Factory Method allow for extension without modification.</li><li><strong>Liskov Substitution Principle:</strong> Patterns ensure that subclasses can be used in place of their parent classes.</li><li><strong>Interface Segregation Principle:</strong> Patterns like Adapter help create focused interfaces.</li><li><strong>Dependency Inversion Principle:</strong> Patterns like Dependency Injection promote depending on abstractions.</li></ul><h3 id=they-reduce-code-duplication>They Reduce Code Duplication</h3><p>By providing standard solutions to common problems, patterns help avoid reinventing solutions, reducing duplicated code across projects.</p><h3 id=they-improve-code-maintainability>They Improve Code Maintainability</h3><p>Well-implemented patterns make code more modular and easier to understand, which simplifies maintenance and updates.</p><h2 id=the-journey-from-pattern-user-to-pattern-creator>The Journey From Pattern User to Pattern Creator</h2><p>As you grow as a developer, your relationship with design patterns will evolve:</p><ol><li><strong>Pattern Recognizer:</strong> First, you&rsquo;ll learn to identify when existing patterns apply to your problems.</li><li><strong>Pattern Implementer:</strong> Then, you&rsquo;ll become comfortable implementing standard patterns in your code.</li><li><strong>Pattern Adapter:</strong> Next, you&rsquo;ll adapt patterns to fit your specific needs, combining and modifying them as necessary.</li><li><strong>Pattern Creator:</strong> Eventually, you might even develop your own patterns to address unique challenges in your domain.</li></ol><h2 id=patterns-as-a-growth-investment>Patterns as a Growth Investment</h2><p>Learning design patterns is one of the best investments you can make in your development career. They provide immediate benefits in code quality and long-term benefits in thinking about software architecture.</p><p>Start small, focus on understanding the problems each pattern solves, and gradually incorporate them into your projects. Over time, you&rsquo;ll find yourself naturally reaching for the right pattern when faced with a familiar challenge.</p><p>Remember, the goal isn&rsquo;t to use patterns for their own sake, but to solve problems efficiently and create maintainable code. When used appropriately, design patterns become powerful tools that elevate your work from merely functional to truly professional.</p><p>Happy pattern hunting!</p><h2 id=additional-resources-for-learning-design-patterns>Additional Resources for Learning Design Patterns</h2><ul><li><p><strong>Books:</strong></p><ul><li>&ldquo;Head First Design Patterns&rdquo; by Eric Freeman and Elisabeth Robson (beginner-friendly)</li><li>&ldquo;Design Patterns Explained&rdquo; by Alan Shalloway and James Trott</li><li>The original &ldquo;Design Patterns&rdquo; by the Gang of Four (more advanced)</li></ul></li><li><p><strong>Online Resources:</strong></p><ul><li><a class=link href=http://Refactoring.Guru target=_blank rel=noopener>Refactoring.Guru</a> (visual explanations with examples in multiple languages)</li><li><a class=link href=http://SourceMaking.com target=_blank rel=noopener>SourceMaking.com</a> (pattern descriptions with real-world examples)</li><li>Design Patterns in the Java Tutorials (Oracle&rsquo;s official examples)</li></ul></li><li><p><strong>Practice Projects:</strong></p><ul><li>Try implementing a simple text editor with undo/redo using the Command pattern</li><li>Build a notification system using the Observer pattern</li><li>Create a document converter that can output different formats using the Strategy pattern</li></ul></li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/development/>Development</a>
+<a href=/tags/design-patterns/>Design Patterns</a>
+<a href=/tags/clean-code/>Clean Code</a></section><section class=article-lastmod><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>Last updated on Mar 08, 2025 20:40 UTC</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/identify-and-refactor-code-smells-for-better-code-quality/><div class=article-image><img src=/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344.ecccd184c3781dae6b5735dc7f51efec_hu_6fa1dea44bdfc8c.png width=250 height=150 loading=lazy alt="Featured image of post How to Identify and Refactor Code Smells for Better Code Quality" data-key=identify-and-refactor-code-smells-for-better-code-quality data-hash="md5-7MzRhMN4Ha5rVzXcf1Hv7A=="></div><div class=article-details><h2 class=article-title>How to Identify and Refactor Code Smells for Better Code Quality</h2></div></a></article><article class=has-image><a href=/refactor-a-tightly-coupled-codebase-by-following-solid-principles/><div class=article-image><img src=/refactor-a-tightly-coupled-codebase-by-following-solid-principles/66b29d4c63629cc69724f054.c3ee0fa73e76b6693234f5df9f8ca83c_hu_bb2569b1ec36a0b5.png width=250 height=150 loading=lazy alt="Featured image of post Refactor a tightly coupled codebase by following SOLID Principles" data-key=refactor-a-tightly-coupled-codebase-by-following-solid-principles data-hash="md5-w+4Ppz52tmkyNPXfn4yoPA=="></div><div class=article-details><h2 class=article-title>Refactor a tightly coupled codebase by following SOLID Principles</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Sparker0i/Sparker0i.github.io data-repo-id=R_kgDOPDIt_w data-category=Announcements data-category-id=DIC_kwDOPDIt_84CsLyO data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=1 data-input-position=top data-theme=preferred_color_scheme data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2017 -
+2026 Sparker0i's Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.34.1>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

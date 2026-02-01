@@ -1,0 +1,484 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Thr complete saga of configuring Immich with NVIDIA GPU support using Podman Quadlet, and the rootless container pitfalls nobody warns you about."><title>Running Immich with GPU Acceleration on Fedora: A Podman Quadlet Journey</title><link rel=canonical href=https://blog.sparker0i.me/immich-gpu-acceleration-podman/><link rel=stylesheet href=/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css><meta property='og:title' content="Running Immich with GPU Acceleration on Fedora: A Podman Quadlet Journey"><meta property='og:description' content="Thr complete saga of configuring Immich with NVIDIA GPU support using Podman Quadlet, and the rootless container pitfalls nobody warns you about."><meta property='og:url' content='https://blog.sparker0i.me/immich-gpu-acceleration-podman/'><meta property='og:site_name' content="Sparker0i's Blog"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Immich'><meta property='article:tag' content='Homelab'><meta property='article:published_time' content='2026-02-01T05:34:00+00:00'><meta property='article:modified_time' content='2026-02-01T05:34:00+00:00'><meta property='og:image' content='https://blog.sparker0i.me/immich-gpu-acceleration-podman/immich.jpg'><meta name=twitter:title content="Running Immich with GPU Acceleration on Fedora: A Podman Quadlet Journey"><meta name=twitter:description content="Thr complete saga of configuring Immich with NVIDIA GPU support using Podman Quadlet, and the rootless container pitfalls nobody warns you about."><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://blog.sparker0i.me/immich-gpu-acceleration-podman/immich.jpg'><link rel="shortcut icon" href=/favicon.png><script async src="https://www.googletagmanager.com/gtag/js?id=G-B20G7JM0X8"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-B20G7JM0X8")}</script></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/sparker0i_hu_693dc16bb266ace6.jpg width=300 height=301 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>😎</span></figure><div class=site-meta><h1 class=site-name><a href=/>Sparker0i's Blog</a></h1><h2 class=site-description>I blog about coding, tech, AI, cricket and other personal hobbies too.</h2></div></header><ol class=menu-social><li><a href=https://github.com/Sparker0i target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/sparker0i target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://steamcommunity.com/id/Sparker0i target=_blank title=Steam rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5.0 11-.653 8.953L11.5 16.962V17a3 3 0 01-2.824 3H8.5a3 3 0 01-2.94-2.402L3 16.5V13l3.51 1.755a2.989 2.989.0 012.834-.635l2.727-3.818A4.5 4.5.0 0116.5 5z"/><circle cx="16.5" cy="9.5" r="1" fill="currentColor"/></svg></a></li><li><a href=https://x.com/Sparker0i target=_blank title=Twitter rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4l11.733 16H20L8.267 4z"/><path d="M4 20l6.768-6.768m2.46-2.46L20 4"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#why-not-docker-compose-or-podman-compose>Why Not Docker Compose or Podman Compose?</a><ol><li><a href=#the-case-against-docker>The Case Against Docker</a></li><li><a href=#podman-compose-vs-quadlet>Podman Compose vs Quadlet</a></li><li><a href=#why-quadlet>Why Quadlet?</a></li></ol></li><li><a href=#initial-setup-converting-docker-compose-to-quadlet>Initial Setup: Converting Docker Compose to Quadlet</a><ol><li><a href=#converting-with-podlet>Converting with podlet</a></li></ol></li><li><a href=#the-journey-issues-encountered-and-solutions>The Journey: Issues Encountered and Solutions</a><ol><li><a href=#1-database-mount-directory-ownership-issues>1. Database Mount Directory Ownership Issues</a></li><li><a href=#2-selinux-volume-mount-errors>2. SELinux Volume Mount Errors</a></li><li><a href=#3-redis-permission-errors-after-running>3. Redis Permission Errors After Running</a></li><li><a href=#4-machine-learning-service-unreachable>4. Machine Learning Service Unreachable</a></li><li><a href=#5-the-gpu-challenge-cuda-driver-version-mismatch>5. The GPU Challenge: CUDA Driver Version Mismatch</a><ol><li><a href=#step-1-set-up-cdi-container-device-interface>Step 1: Set Up CDI (Container Device Interface)</a></li><li><a href=#step-2-test-cdi-gpu-access>Step 2: Test CDI GPU Access</a></li><li><a href=#step-3-move-ml-container-outside-pod>Step 3: Move ML Container Outside Pod</a></li></ol></li><li><a href=#6-network-connectivity-between-pod-and-host>6. Network Connectivity Between Pod and Host</a></li></ol></li><li><a href=#final-working-configuration>Final Working Configuration</a><ol><li><a href=#pod-definition-immichpod>Pod Definition (<code>immich.pod</code>)</a></li><li><a href=#database-container-immich-databasecontainer>Database Container (<code>immich-database.container</code>)</a></li><li><a href=#redis-container-immich-rediscontainer>Redis Container (<code>immich-redis.container</code>)</a></li><li><a href=#server-container-immich-servercontainer>Server Container (<code>immich-server.container</code>)</a></li><li><a href=#machine-learning-container-immich-machine-learningcontainer>Machine Learning Container (<code>immich-machine-learning.container</code>)</a></li><li><a href=#deployment-steps>Deployment Steps</a></li></ol></li><li><a href=#verification-and-testing>Verification and Testing</a><ol><li><a href=#check-all-services-are-running>Check All Services are Running</a></li><li><a href=#verify-gpu-acceleration-is-active>Verify GPU Acceleration is Active</a></li><li><a href=#test-web-interface>Test Web Interface</a></li></ol></li><li><a href=#key-learnings>Key Learnings</a></li><li><a href=#troubleshooting-commands>Troubleshooting Commands</a></li><li><a href=#references>References</a></li><li><a href=#conclusion>Conclusion</a></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/immich-gpu-acceleration-podman/><img src=/immich-gpu-acceleration-podman/immich_hu_bcef489c77af49f7.jpg srcset="/immich-gpu-acceleration-podman/immich_hu_bcef489c77af49f7.jpg 800w, /immich-gpu-acceleration-podman/immich_hu_68141d7fcdca79c8.jpg 1600w" width=800 height=482 loading=lazy alt="Featured image of post Running Immich with GPU Acceleration on Fedora: A Podman Quadlet Journey"></a></div><div class=article-details><header class=article-category><a href=/categories/homelab/ style=background-color:#beefc2;color:#0f3d13>Homelab</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/immich-gpu-acceleration-podman/>Running Immich with GPU Acceleration on Fedora: A Podman Quadlet Journey</a></h2><h3 class=article-subtitle>Thr complete saga of configuring Immich with NVIDIA GPU support using Podman Quadlet, and the rootless container pitfalls nobody warns you about.</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-02-01T05:34:00Z>Feb 01, 2026</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>12 minute read</time></div></footer></div></header><section class=article-content><p>Cloud photo services keep getting more expensive, and there&rsquo;s something unsettling about handing years of memories to companies that might change their terms, get acquired, or simply shut down. We&rsquo;ve seen that happen with Google Photos when they offered their service for free for the first few years to make people get used to their product, and then flipped the switch on them to make them.</p><p><a class=link href=https://immich.app/ target=_blank rel=noopener>Immich</a> offers a compelling alternative - an open-source photo management platform that rivals Google Photos and iCloud, without the subscription fees or storage limits.</p><p>I&rsquo;ve been running Fedora on my gaming PC for a while - which has since been repurposed to a homelab while not gaming - and Podman has become my go-to container runtime. It&rsquo;s daemon-free, runs rootless by default, and integrates cleanly with systemd. But adding GPU acceleration to the mix - necessary for Immich&rsquo;s AI features like facial recognition and smart search - turns a straightforward setup into a complex puzzle involving user namespaces, device permissions, SELinux policies, and network configuration.</p><p>This guide walks through my complete setup of Immich v2 with full CUDA GPU acceleration using Podman Quadlet. The journey involved navigating several poorly-documented incompatibilities between rootless containers and GPU access. The result is a self-hosted photo solution that actually uses your own hardware.</p><p><strong>System Environment:</strong></p><ul><li>OS: Fedora Linux with SELinux enforcing</li><li>Container Runtime: Podman 5.x (rootless mode)</li><li>GPU: NVIDIA GeForce RTX 5080</li><li>Driver: NVIDIA 580.119.02, CUDA 13.0</li><li>Immich: v2</li></ul><h2 id=why-not-docker-compose-or-podman-compose>Why Not Docker Compose or Podman Compose?</h2><p>Before diving into the setup, it&rsquo;s worth explaining why I chose Podman Quadlet over the more familiar Docker Compose or even Podman Compose.</p><h3 id=the-case-against-docker>The Case Against Docker</h3><p>Docker requires a daemon running as root, which means:</p><ul><li><strong>Root privileges</strong>: The Docker daemon runs with full root access, and any user in the <code>docker</code> group effectively has root on the host (they can mount any directory and modify system files)</li><li><strong>Daemon dependency</strong>: If the Docker daemon crashes or hangs, all containers stop</li><li><strong>Background service</strong>: Docker constantly consumes resources even when no containers are running</li></ul><p>Podman, by contrast, is daemonless and runs rootless by default. Each container runs under your own user, making it inherently more secure for personal homelab use.</p><h3 id=podman-compose-vs-quadlet>Podman Compose vs Quadlet</h3><p>Podman Compose exists as a drop-in replacement for Docker Compose, but it has limitations:</p><ul><li><strong>External tool</strong>: It&rsquo;s a wrapper around Podman that needs to be installed separately and run manually</li><li><strong>No systemd integration</strong>: Starting containers on boot requires manual setup with systemd service files</li><li><strong>Command-driven</strong>: You still run <code>podman-compose up -d</code>, which feels like a workaround rather than native integration</li></ul><h3 id=why-quadlet>Why Quadlet?</h3><p><strong>Quadlet</strong> lets you define containers as systemd unit files (<code>.container</code>, <code>.pod</code>, <code>.volume</code>, etc.) in <code>~/.config/containers/systemd/</code>. The benefits are significant:</p><ol><li><strong>Native systemd integration</strong>: Containers are managed as systemd services - start, stop, enable, and check status using familiar <code>systemctl</code> commands</li><li><strong>Automatic startup</strong>: Enable services to start on boot with <code>systemctl --user enable &lt;service></code></li><li><strong>Service dependencies</strong>: Define explicit dependencies (e.g., database must start before server) using systemd&rsquo;s <code>Requires=</code> and <code>After=</code> directives</li><li><strong>Unified management</strong>: All system services - containers or not - are managed the same way. Your Immich service appears alongside other systemd services</li><li><strong>Declarative configuration</strong>: No imperative <code>up/down</code> commands. The configuration files define the desired state, and systemd maintains it</li></ol><p>For a homelab server where I want everything to start automatically after a reboot and recover from failures, Quadlet is the cleaner solution. It&rsquo;s the &ldquo;Fedora way&rdquo; of running containers - embracing systemd rather than fighting it.</p><p>That said, this approach has trade-offs. The main one you&rsquo;ll see in this guide: Quadlet&rsquo;s rootless pods with user namespace remapping create complications with GPU device access that are easier to work around in Docker. But the security and integration benefits are worth the extra setup effort.</p><h2 id=initial-setup-converting-docker-compose-to-quadlet>Initial Setup: Converting Docker Compose to Quadlet</h2><p>Start by obtaining Immich&rsquo;s docker-compose.yml. You would then need to adapt it for Podman by making the following changes in the compose file:</p><ul><li>Set <code>DB_HOSTNAME</code> and <code>REDIS_HOSTNAME</code> to <code>127.0.0.1</code> for microservice communication within the same pod</li><li>Used absolute paths for volumes. I&rsquo;m currently using <code>/mnt/server/immich-app</code></li><li>Specified environment file location</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>immich</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>immich-server</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>ghcr.io/immich-app/immich-server:v2</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/server/upload:/data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/localtime:/etc/localtime:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ports</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;2283:2283&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>depends_on</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>redis</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>database</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>DB_HOSTNAME</span><span class=p>:</span><span class=w> </span><span class=m>127.0.0.1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>REDIS_HOSTNAME</span><span class=p>:</span><span class=w> </span><span class=m>127.0.0.1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>env_file</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/.env</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>always</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>machine-learning</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>ghcr.io/immich-app/immich-machine-learning:v2-cuda</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/model-cache:/cache</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>env_file</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/.env</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>always</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>immich-redis</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>docker.io/valkey/valkey:9</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/redis:/data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>always</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>immich-database</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/postgres:/var/lib/postgresql/data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>env_file</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/mnt/server/immich-app/.env</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>always</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=converting-with-podlet>Converting with podlet</h3><p>Use <a class=link href=https://github.com/containers/podlet target=_blank rel=noopener>podlet</a> to convert the compose file to Quadlet unit files:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Install podlet if not already installed</span>
+</span></span><span class=line><span class=cl>dnf install podlet
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Convert to Quadlet files</span>
+</span></span><span class=line><span class=cl>podlet compose -i -a --pod
+</span></span></code></pre></td></tr></table></div></div><p>The <code>-i</code> flag adds <code>[Install]</code> sections, <code>-a</code> converts relative paths to absolute paths, and <code>--pod</code> creates a pod for all services.</p><p>This generates <code>.container</code> and <code>.pod</code> files that belong in <code>~/.config/containers/systemd/</code>. However, achieving GPU acceleration requires working through several complications that aren&rsquo;t covered in the standard documentation.</p><h2 id=the-journey-issues-encountered-and-solutions>The Journey: Issues Encountered and Solutions</h2><h3 id=1-database-mount-directory-ownership-issues>1. Database Mount Directory Ownership Issues</h3><p><strong>Problem Manifestation:</strong></p><p>The PostgreSQL data directory at <code>/mnt/server/immich-app/postgres</code> was owned by <code>systemd-oom</code> user from a previous installation attempt, causing permission denied errors when the database tried to access files.</p><p><strong>Solution:</strong></p><p>Changed ownership to the current user:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo chown -R <span class=nv>$USER</span>:<span class=nv>$USER</span> /mnt/server/immich-app/postgres
+</span></span></code></pre></td></tr></table></div></div><p>Then added <code>UserNS=keep-id</code> to the pod configuration to maintain consistent UID/GID between host and containers:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># immich.pod</span>
+</span></span><span class=line><span class=cl><span class=k>[Pod]</span>
+</span></span><span class=line><span class=cl><span class=na>PodName</span><span class=o>=</span><span class=s>systemd-immich</span>
+</span></span><span class=line><span class=cl><span class=na>PublishPort</span><span class=o>=</span><span class=s>2283:2283</span>
+</span></span><span class=line><span class=cl><span class=na>UserNS</span><span class=o>=</span><span class=s>keep-id</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=2-selinux-volume-mount-errors>2. SELinux Volume Mount Errors</h3><p><strong>Problem Manifestation:</strong></p><p>Server container failed to start with SELinux errors when using the <code>:Z</code> flag on existing volume mounts.</p><p><strong>Solution:</strong></p><p>Removed the <code>:Z</code> flag and added <code>--security-opt label=disable</code> to disable SELinux labeling for this container:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># server.container</span>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span><span class=line><span class=cl><span class=na>PodmanArgs</span><span class=o>=</span><span class=s>--security-opt label=disable</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/server/upload:/data</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/etc/localtime:/etc/localtime:ro</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=3-redis-permission-errors-after-running>3. Redis Permission Errors After Running</h3><p><strong>Problem Manifestation:</strong></p><p>After solving the database ownership issue, the Immich server started crashing repeatedly with:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>ERROR [Microservices:MetadataService] Unable to initialize reverse geocoding:
+</span></span><span class=line><span class=cl>ReplyError: MISCONF Valkey is configured to save RDB snapshots, but it&#39;s
+</span></span><span class=line><span class=cl>currently unable to persist to disk.
+</span></span></code></pre></td></tr></table></div></div><p>Valkey logs revealed the root cause:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Failed opening the temp RDB file temp-1.rdb (in server root dir /data)
+</span></span><span class=line><span class=cl>for saving: Permission denied
+</span></span></code></pre></td></tr></table></div></div><p><strong>Solution:</strong></p><p>Found in <a class=link href=https://www.nite07.com/en/posts/podman/ target=_blank rel=noopener>nite07&rsquo;s Podman guide</a>: add <code>User=root</code> and <code>Group=root</code> to the Redis container configuration:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># immich-redis.container</span>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span><span class=line><span class=cl><span class=na>User</span><span class=o>=</span><span class=s>root</span>
+</span></span><span class=line><span class=cl><span class=na>Group</span><span class=o>=</span><span class=s>root</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span></code></pre></td></tr></table></div></div><p>After this change, reload systemd:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user daemon-reload
+</span></span><span class=line><span class=cl>systemctl --user restart immich-pod
+</span></span></code></pre></td></tr></table></div></div><h3 id=4-machine-learning-service-unreachable>4. Machine Learning Service Unreachable</h3><p><strong>Problem Manifestation:</strong></p><p>Server logs showed ML service became unhealthy, unable to connect to the machine learning container.</p><p><strong>Solution:</strong></p><p>The server was trying to reach the ML service using container hostname. Added explicit environment variable to use localhost:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># immich-server.container</span>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span><span class=line><span class=cl><span class=na>Environment</span><span class=o>=</span><span class=s>DB_HOSTNAME=127.0.0.1 REDIS_HOSTNAME=127.0.0.1 IMMICH_MACHINE_LEARNING_URL=http://127.0.0.1:3003</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span></code></pre></td></tr></table></div></div><p><em>Note: This was later changed to <code>http://host.containers.internal:3003</code> after moving ML outside the pod.</em></p><h3 id=5-the-gpu-challenge-cuda-driver-version-mismatch>5. The GPU Challenge: CUDA Driver Version Mismatch</h3><p><strong>Problem Manifestation:</strong></p><p>The ML container initially used implicit GPU assignment:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=na>PodmanArgs</span><span class=o>=</span><span class=s>--gpus all ...</span>
+</span></span></code></pre></td></tr></table></div></div><p>When starting, it failed with:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>CUDA failure 35: CUDA driver version is insufficient for CUDA runtime version
+</span></span></code></pre></td></tr></table></div></div><p>Despite having NVIDIA Driver 580.119.02 and CUDA 13.0 installed on the host, the container couldn&rsquo;t access the GPU properly.</p><p><strong>Root Cause:</strong></p><p>After extensive troubleshooting, I discovered that rootless Podman pods with <code>UserNS=keep-id</code> are <strong>incompatible with CDI (Container Device Interface) GPU device access</strong>. This isn&rsquo;t well-documented and required significant debugging to identify.</p><p><strong>Understanding the Conflict:</strong></p><p><strong>UserNS=keep-id</strong> preserves your host user&rsquo;s UID/GID inside containers. Normally in rootless mode, Podman maps container UIDs to a range of host UIDs (e.g., container root UID 0 → host UID 100000). With <code>UserNS=keep-id</code>, your UID stays the same (e.g., UID 1000 stays UID 1000), making file ownership manageable.</p><p><strong>CDI (Container Device Interface)</strong> is NVIDIA&rsquo;s modern approach to exposing GPUs to containers. Instead of manually mounting device nodes like <code>/dev/nvidia0</code>, CDI uses a specification file (<code>nvidia.yaml</code>) that describes GPU devices, their dependencies, and required hooks. When you use <code>--device nvidia.com/gpu=all</code>, Podman reads this spec and sets up the GPU environment.</p><p><strong>The Incompatibility:</strong></p><p>CDI relies on device node ownership and permissions that are set up outside the user namespace. When <code>UserNS=keep-id</code> is active in a pod:</p><ol><li>The pod creates a user namespace with UID mapping</li><li>CDI tries to bind GPU device nodes into this namespace</li><li>The device nodes&rsquo; permissions become inconsistent due to UID remapping</li><li>The container runtime (crun) fails with &ldquo;File exists&rdquo; or permission errors</li></ol><p>GPU access works perfectly in standalone containers (no user namespace conflicts) but fails inside pods with <code>UserNS=keep-id</code>.</p><p><strong>Solution Path:</strong></p><h4 id=step-1-set-up-cdi-container-device-interface>Step 1: Set Up CDI (Container Device Interface)</h4><p>First, make the NVIDIA CDI specification accessible to rootless Podman (Replace <code>sparker0i</code> with your username):</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Copy CDI specification to user directory</span>
+</span></span><span class=line><span class=cl>mkdir -p ~/.config/cdi
+</span></span><span class=line><span class=cl>sudo cp /var/run/cdi/nvidia.yaml ~/.config/cdi/
+</span></span><span class=line><span class=cl>sudo chown sparker0i:sparker0i ~/.config/cdi/nvidia.yaml
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Configure Podman to use CDI</span>
+</span></span><span class=line><span class=cl>cat &gt; ~/.config/containers/containers.conf <span class=s>&lt;&lt; &#39;EOF&#39;
+</span></span></span><span class=line><span class=cl><span class=s>[engine]
+</span></span></span><span class=line><span class=cl><span class=s>cdi_spec_dirs = [&#34;/var/run/cdi&#34;, &#34;/home/sparker0i/.config/cdi&#34;]
+</span></span></span><span class=line><span class=cl><span class=s>EOF</span>
+</span></span></code></pre></td></tr></table></div></div><p>Verify CDI devices are available:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>cat /var/run/cdi/nvidia.yaml <span class=p>|</span> head -50
+</span></span></code></pre></td></tr></table></div></div><h4 id=step-2-test-cdi-gpu-access>Step 2: Test CDI GPU Access</h4><p>Testing confirmed the incompatibility:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Test FAILED in pod with UserNS=keep-id</span>
+</span></span><span class=line><span class=cl>podman run --rm --pod systemd-immich --device nvidia.com/gpu<span class=o>=</span>all <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  ghcr.io/immich-app/immich-machine-learning:v2-cuda <span class=nb>echo</span> <span class=s2>&#34;Test&#34;</span>
+</span></span><span class=line><span class=cl><span class=c1># Error: crun: read status from sync socket: File exists</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Test SUCCEEDED outside pod</span>
+</span></span><span class=line><span class=cl>podman run --rm --device nvidia.com/gpu<span class=o>=</span>all <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  ghcr.io/immich-app/immich-machine-learning:v2-cuda <span class=nb>echo</span> <span class=s2>&#34;Test&#34;</span>
+</span></span><span class=line><span class=cl><span class=c1># Output: Test</span>
+</span></span></code></pre></td></tr></table></div></div><p>This confirmed that CDI GPU devices work perfectly in standalone containers but fail when combined with pod + UserNS=keep-id.</p><h4 id=step-3-move-ml-container-outside-pod>Step 3: Move ML Container Outside Pod</h4><p>The solution was to run the ML container outside the pod with host networking:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># immich-machine-learning.container</span>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>EnvironmentFile</span><span class=o>=</span><span class=s>/mnt/server/immich-app/.env</span>
+</span></span><span class=line><span class=cl><span class=na>Image</span><span class=o>=</span><span class=s>ghcr.io/immich-app/immich-machine-learning:v2-cuda</span>
+</span></span><span class=line><span class=cl><span class=na>Network</span><span class=o>=</span><span class=s>host</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/model-cache:/cache</span>
+</span></span><span class=line><span class=cl><span class=na>PodmanArgs</span><span class=o>=</span><span class=s>--device nvidia.com/gpu=all --security-opt label=disable</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Restart</span><span class=o>=</span><span class=s>always</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=6-network-connectivity-between-pod-and-host>6. Network Connectivity Between Pod and Host</h3><p><strong>Problem Manifestation:</strong></p><p>After moving the ML container to host network, the server (still in the pod) couldn&rsquo;t reach it at <code>127.0.0.1:3003</code>. The containers were now in different network namespaces.</p><p><strong>Solution:</strong></p><p>Podman provides a special hostname <code>host.containers.internal</code> that automatically resolves to the host gateway IP from within pod containers. This hostname remains stable across reboots, unlike manually using gateway IPs like <code>169.254.1.2</code>.</p><p>Testing from inside the server container:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check resolution</span>
+</span></span><span class=line><span class=cl>podman <span class=nb>exec</span> systemd-server getent hosts host.containers.internal
+</span></span><span class=line><span class=cl><span class=c1># Output: 169.254.1.2     host.containers.internal host.docker.internal</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Test connectivity</span>
+</span></span><span class=line><span class=cl>podman <span class=nb>exec</span> systemd-server curl -s http://host.containers.internal:3003/ping
+</span></span><span class=line><span class=cl><span class=c1># Output: pong</span>
+</span></span></code></pre></td></tr></table></div></div><p>Updated the server configuration:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=c1># server.container</span>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>Environment</span><span class=o>=</span><span class=s>DB_HOSTNAME=127.0.0.1 REDIS_HOSTNAME=127.0.0.1 IMMICH_MACHINE_LEARNING_URL=http://host.containers.internal:3003</span>
+</span></span><span class=line><span class=cl><span class=na>...</span>
+</span></span></code></pre></td></tr></table></div></div><p>After making this change:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user daemon-reload
+</span></span><span class=line><span class=cl>systemctl --user restart server.service
+</span></span></code></pre></td></tr></table></div></div><h2 id=final-working-configuration>Final Working Configuration</h2><p>After working through all these issues, here&rsquo;s the complete working configuration. All files belong in <code>~/.config/containers/systemd/</code>.</p><h3 id=pod-definition-immichpod>Pod Definition (<code>immich.pod</code>)</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Pod]</span>
+</span></span><span class=line><span class=cl><span class=na>PodName</span><span class=o>=</span><span class=s>systemd-immich</span>
+</span></span><span class=line><span class=cl><span class=na>PublishPort</span><span class=o>=</span><span class=s>2283:2283</span>
+</span></span><span class=line><span class=cl><span class=na>UserNS</span><span class=o>=</span><span class=s>keep-id</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=database-container-immich-databasecontainer>Database Container (<code>immich-database.container</code>)</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>After</span><span class=o>=</span><span class=s>immich.pod</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>EnvironmentFile</span><span class=o>=</span><span class=s>/mnt/server/immich-app/.env</span>
+</span></span><span class=line><span class=cl><span class=na>Image</span><span class=o>=</span><span class=s>docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0</span>
+</span></span><span class=line><span class=cl><span class=na>Pod</span><span class=o>=</span><span class=s>immich.pod</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/postgres:/var/lib/postgresql/data</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Restart</span><span class=o>=</span><span class=s>always</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=redis-container-immich-rediscontainer>Redis Container (<code>immich-redis.container</code>)</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>After</span><span class=o>=</span><span class=s>immich.pod</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>Image</span><span class=o>=</span><span class=s>docker.io/valkey/valkey:9</span>
+</span></span><span class=line><span class=cl><span class=na>Pod</span><span class=o>=</span><span class=s>immich.pod</span>
+</span></span><span class=line><span class=cl><span class=na>User</span><span class=o>=</span><span class=s>root</span>
+</span></span><span class=line><span class=cl><span class=na>Group</span><span class=o>=</span><span class=s>root</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/redis:/data</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Restart</span><span class=o>=</span><span class=s>always</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=server-container-immich-servercontainer>Server Container (<code>immich-server.container</code>)</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>Requires</span><span class=o>=</span><span class=s>redis.service database.service</span>
+</span></span><span class=line><span class=cl><span class=na>After</span><span class=o>=</span><span class=s>redis.service database.service</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>Environment</span><span class=o>=</span><span class=s>DB_HOSTNAME=127.0.0.1 REDIS_HOSTNAME=127.0.0.1 IMMICH_MACHINE_LEARNING_URL=http://host.containers.internal:3003</span>
+</span></span><span class=line><span class=cl><span class=na>EnvironmentFile</span><span class=o>=</span><span class=s>/mnt/server/immich-app/.env</span>
+</span></span><span class=line><span class=cl><span class=na>Image</span><span class=o>=</span><span class=s>ghcr.io/immich-app/immich-server:v2</span>
+</span></span><span class=line><span class=cl><span class=na>Pod</span><span class=o>=</span><span class=s>immich.pod</span>
+</span></span><span class=line><span class=cl><span class=na>PodmanArgs</span><span class=o>=</span><span class=s>--security-opt label=disable</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/server/upload:/data</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/etc/localtime:/etc/localtime:ro</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Restart</span><span class=o>=</span><span class=s>always</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=machine-learning-container-immich-machine-learningcontainer>Machine Learning Container (<code>immich-machine-learning.container</code>)</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Container]</span>
+</span></span><span class=line><span class=cl><span class=na>EnvironmentFile</span><span class=o>=</span><span class=s>/mnt/server/immich-app/.env</span>
+</span></span><span class=line><span class=cl><span class=na>Image</span><span class=o>=</span><span class=s>ghcr.io/immich-app/immich-machine-learning:v2-cuda</span>
+</span></span><span class=line><span class=cl><span class=na>Network</span><span class=o>=</span><span class=s>host</span>
+</span></span><span class=line><span class=cl><span class=na>Volume</span><span class=o>=</span><span class=s>/mnt/server/immich-app/model-cache:/cache</span>
+</span></span><span class=line><span class=cl><span class=na>PodmanArgs</span><span class=o>=</span><span class=s>--device nvidia.com/gpu=all --security-opt label=disable</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Restart</span><span class=o>=</span><span class=s>always</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>default.target</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=deployment-steps>Deployment Steps</h3><ol><li><p><strong>Save unit files</strong>: Place all the above files in <code>~/.config/containers/systemd/</code> directory.</p></li><li><p><strong>Create data directories</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir -p /mnt/server/immich-app/<span class=o>{</span>postgres,redis,server/upload,model-cache<span class=o>}</span>
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>Reload systemd</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user daemon-reload
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>Start services</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Start the pod first</span>
+</span></span><span class=line><span class=cl>systemctl --user start immich.pod
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Start individual services (they&#39;ll auto-start with dependencies)</span>
+</span></span><span class=line><span class=cl>systemctl --user start database.service
+</span></span><span class=line><span class=cl>systemctl --user start redis.service
+</span></span><span class=line><span class=cl>systemctl --user start server.service
+</span></span><span class=line><span class=cl>systemctl --user start immich-machine-learning.service
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>Enable auto-start on boot</strong> (optional):</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user <span class=nb>enable</span> immich.pod database.service redis.service <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  server.service immich-machine-learning.service
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>Check status</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user status database.service redis.service <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  server.service immich-machine-learning.service
+</span></span></code></pre></td></tr></table></div></div></li></ol><h2 id=verification-and-testing>Verification and Testing</h2><h3 id=check-all-services-are-running>Check All Services are Running</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user status database.service redis.service <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  server.service immich-machine-learning.service --no-pager <span class=p>|</span> grep -E <span class=s2>&#34;^●|Active:&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>Expected output showing all services <code>active (running)</code>.</p><h3 id=verify-gpu-acceleration-is-active>Verify GPU Acceleration is Active</h3><ol><li><p><strong>Check ONNX Runtime providers</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>podman <span class=nb>exec</span> systemd-immich-machine-learning python -c <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>  <span class=s2>&#34;import onnxruntime as ort; print(&#39;Available providers:&#39;, ort.get_available_providers())&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>Expected output:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Available providers: [&#39;TensorrtExecutionProvider&#39;, &#39;CUDAExecutionProvider&#39;, &#39;CPUExecutionProvider&#39;]
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>Check GPU memory usage</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>nvidia-smi --query-compute-apps<span class=o>=</span>pid,process_name,used_memory --format<span class=o>=</span>csv
+</span></span></code></pre></td></tr></table></div></div><p>You should see the Python process from the ML container using GPU memory.</p></li><li><p><strong>Check container logs for CUDA provider</strong>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>podman logs systemd-immich-machine-learning 2&gt;<span class=p>&amp;</span><span class=m>1</span> <span class=p>|</span> grep -i <span class=s2>&#34;provider&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>Expected output:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>INFO     Setting execution providers to [&#39;CUDAExecutionProvider&#39;, &#39;CPUExecutionProvider&#39;]
+</span></span></code></pre></td></tr></table></div></div></li></ol><h3 id=test-web-interface>Test Web Interface</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>curl -s -o /dev/null -w <span class=s2>&#34;%{http_code}\n&#34;</span> http://127.0.0.1:2283
+</span></span></code></pre></td></tr></table></div></div><p>Expected: <code>200</code></p><p>Now you can access Immich at <code>http://localhost:2283</code> in your browser!</p><h2 id=key-learnings>Key Learnings</h2><ol><li><p><strong>CDI vs Device Mounts</strong>: Use CDI (<code>--device nvidia.com/gpu=all</code>) instead of explicit device mounts for cleaner GPU access.</p></li><li><p><strong>UserNS + CDI Incompatibility</strong>: Rootless pods with <code>UserNS=keep-id</code> cannot use CDI GPU devices. The workaround is to run GPU containers outside the pod.</p></li><li><p><strong>Host Networking for GPU</strong>: When GPU containers need to be outside the pod, use <code>Network=host</code> for simplicity.</p></li><li><p><strong>Cross-Network Communication</strong>: Use <code>host.containers.internal</code> for pod containers to reach host network services. This hostname is stable across reboots.</p></li><li><p><strong>SELinux Considerations</strong>: For rootless containers with existing data volumes, use <code>--security-opt label=disable</code> instead of <code>:Z</code> flag.</p></li><li><p><strong>Redis Permissions</strong>: Valkey/Redis in rootless containers may need <code>User=root</code> and <code>Group=root</code> to access data directories.</p></li><li><p><strong>systemd-reload Required</strong>: Always run <code>systemctl --user daemon-reload</code> after editing <code>.container</code> files.</p></li><li><p><strong>CPU Usage is Normal</strong>: ML containers will use significant CPU (20-30%) even with GPU acceleration, as CPU handles preprocessing, data transfer, and orchestration.</p></li></ol><h2 id=troubleshooting-commands>Troubleshooting Commands</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check service status</span>
+</span></span><span class=line><span class=cl>systemctl --user status &lt;service&gt;.service
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># View logs</span>
+</span></span><span class=line><span class=cl>journalctl --user -u &lt;service&gt;.service --since <span class=s2>&#34;5 minutes ago&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Direct container logs</span>
+</span></span><span class=line><span class=cl>podman logs systemd-&lt;container-name&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Test network connectivity from container</span>
+</span></span><span class=line><span class=cl>podman <span class=nb>exec</span> &lt;container-name&gt; curl http://host.containers.internal:3003/ping
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Check GPU device mounts</span>
+</span></span><span class=line><span class=cl>podman inspect &lt;container-name&gt; --format <span class=s1>&#39;{{.HostConfig.Devices}}&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Monitor resource usage</span>
+</span></span><span class=line><span class=cl>podman stats --no-stream
+</span></span></code></pre></td></tr></table></div></div><h2 id=references>References</h2><ul><li><a class=link href=https://www.nite07.com/en/posts/podman/ target=_blank rel=noopener>Nite07&rsquo;s Podman Guide</a> - Redis user/group solution</li><li><a class=link href=https://immich.app/docs target=_blank rel=noopener>Immich Documentation</a></li><li><a class=link href=https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html target=_blank rel=noopener>Podman Quadlet Documentation</a></li><li><a class=link href=https://github.com/NVIDIA/nvidia-container-toolkit target=_blank rel=noopener>NVIDIA Container Device Interface</a></li></ul><h2 id=conclusion>Conclusion</h2><p>Running Immich with GPU acceleration on Podman requires careful consideration of network namespaces, user namespaces, and device access. The key insight is that GPU containers must run outside pods when using <code>UserNS=keep-id</code>, with cross-network communication handled via <code>host.containers.internal</code>.</p><p>The final setup provides:</p><ul><li>Full GPU acceleration for ML workloads</li><li>Rootless containers for security</li><li>Systemd integration for automatic startup</li><li>Proper service dependencies</li><li>Persistent configuration across reboots</li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/immich/>Immich</a>
+<a href=/tags/homelab/>Homelab</a></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><script src=https://giscus.app/client.js data-repo=Sparker0i/Sparker0i.github.io data-repo-id=R_kgDOPDIt_w data-category=Announcements data-category-id=DIC_kwDOPDIt_84CsLyO data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=1 data-input-position=top data-theme=preferred_color_scheme data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2017 -
+2026 Sparker0i's Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.34.1>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

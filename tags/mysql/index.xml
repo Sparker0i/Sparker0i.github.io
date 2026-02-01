@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>MySQL on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/mysql/</link><description>Recent content in MySQL on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 14 Apr 2024 17:46:18 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/mysql/index.xml" rel="self" type="application/rss+xml"/><item><title>MySQL installation inside Docker on Mac</title><link>https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/</link><pubDate>Thu, 28 Mar 2019 19:25:50 +0000</pubDate><guid>https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/</guid><description>&lt;img src="https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a.png" alt="Featured image of post MySQL installation inside Docker on Mac" /&gt;&lt;p&gt;I’ve never liked to make changes to my laptop by providing my admin credentials to install various tools, like MySQL because I love doing things at a user level. Programs like VSCode and Atom are good examples of that when all you do is drag the application icon to the Applications folder. Homebrew is also a good example to install command line applications at a user level.&lt;/p&gt;
+&lt;p&gt;If you were to install using the official installer, you’d have to give administrator rights. You will also have to make changes to your bash profile to access mysql in terminal. All these problems can be alleviated by installing a MySQL container inside Docker.&lt;/p&gt;
+&lt;h3 id="install-docker-community-edition"&gt;INSTALL DOCKER COMMUNITY EDITION
+&lt;/h3&gt;&lt;p&gt;Download Docker Desktop for Mac by visiting this &lt;a class="link" href="https://hub.docker.com/search/?type=edition&amp;amp;offering=community&amp;amp;ref=localhost" target="_blank" rel="noopener"
+&gt;link.&lt;/a&gt; Then you need to install Docker on your Mac by following the installation steps. It is recommended not to change any defaults if prompted.&lt;/p&gt;
+&lt;p&gt;Once you are done with that, we will now proceed with the installation of MySQL container inside Docker. You can either do it inside a terminal, or use a tool like Kitematic using which you can manage multiple containers in your system once you create them.&lt;/p&gt;
+&lt;p&gt;Fire up a terminal, and write this command&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;docker run --name=mysql -d -p 3306:3306 -e MYSQL_USER=developer -e MYSQL_PASSWORD=mydbpwd -e MYSQL_DATABASE=mydb mysql/mysql-server
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Here we will use the &lt;code&gt;mysql/mysql-server&lt;/code&gt; image, and our Username, password and Database are &lt;code&gt;developer&lt;/code&gt;, &lt;code&gt;mydbpwd&lt;/code&gt; and &lt;code&gt;mydb&lt;/code&gt; respectively. Then do the port mapping between the container and the host. We bind Container’s port 3306 to the Mac’s port 3306.&lt;/p&gt;
+&lt;p&gt;If everything goes fine, you should see a combination of alphabets and numbers as an output. This is the container ID. Type this command:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;docker exec -it mysql bash -c &amp;#34;mysql -u developer -p&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Then enter the password you entered while creating the container (In this case &lt;code&gt;mydbpwd&lt;/code&gt;). Then you will have an instance up and running inside Docker.&lt;/p&gt;
+&lt;h3 id="check-mysql-connectivity-inside-mysql-workbench"&gt;CHECK MYSQL CONNECTIVITY INSIDE MYSQL WORKBENCH
+&lt;/h3&gt;&lt;p&gt;First up install MySQL Workbench, either using the official installer or using the brew command &lt;code&gt;brew cask install mysqlworkbench&lt;/code&gt;. Once you open up the MySQLWorkbench, click on the add connection button, then enter as following:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_196bbda6-607c-4b35-8675-4358657423b4.png"
+width="798"
+height="500"
+srcset="https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_196bbda6-607c-4b35-8675-4358657423b4_hu_cbb0d7d1e8773b66.png 480w, https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_196bbda6-607c-4b35-8675-4358657423b4_hu_72e99538578fb6ad.png 1024w"
+loading="lazy"
+alt="Creating a new connection inside MySQL Workbench"
+class="gallery-image"
+data-flex-grow="159"
+data-flex-basis="383px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Creating a new connection inside MySQL Workbench&lt;/p&gt;
+&lt;p&gt;Then click the Test Connection button. If everything goes alright, you will get this popup:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_0988817e-9314-441e-a248-5fd705bdf609.png"
+width="420"
+height="236"
+srcset="https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_0988817e-9314-441e-a248-5fd705bdf609_hu_8065cca634ed767.png 480w, https://blog.sparker0i.me/mysql-installation-inside-docker-on-mac/661c084eec6af0386c750e4a_0988817e-9314-441e-a248-5fd705bdf609_hu_c0c999683a8f5a19.png 1024w"
+loading="lazy"
+alt="Connection established with MySQL Container in Docker"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="427px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Connection established with MySQL Container in Docker&lt;/p&gt;
+&lt;h3 id="conclusion"&gt;CONCLUSION
+&lt;/h3&gt;&lt;p&gt;Installing MySQL in Docker on your PC is a safer approach to installing MySQL than providing Admin credentials to install using the official installer. If anything goes wrong, all you have to do is delete the container and create a new one in Docker.&lt;/p&gt;
+&lt;h3 id="references"&gt;REFERENCES
+&lt;/h3&gt;&lt;p&gt;&lt;a class="link" href="https://medium.com/@crmcmullen/how-to-run-mysql-in-a-docker-container-on-macos-with-persistent-local-data-58b89aec496a?ref=localhost" target="_blank" rel="noopener"
+&gt;Run MySQL in a Docker Container – Medium&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>

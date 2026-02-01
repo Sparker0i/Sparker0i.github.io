@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Apple Silicon on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/apple-silicon/</link><description>Recent content in Apple Silicon on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 06 Aug 2024 22:02:45 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/apple-silicon/index.xml" rel="self" type="application/rss+xml"/><item><title>How to use Devcontainers to create apps with x86 architecture on an Apple Silicon Mac</title><link>https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/</link><pubDate>Tue, 09 Apr 2024 15:51:58 +0000</pubDate><guid>https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/</guid><description>&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf.png" alt="Featured image of post How to use Devcontainers to create apps with x86 architecture on an Apple Silicon Mac" /&gt;&lt;p&gt;&lt;em&gt;UPDATE 25th June 2024: Modified the article to include podman alongside colima.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Apps are a significant part of our lives today. There are various apps you might be using today. On a smartphone, you would be using WhatsApp, Snapchat, Instagram, YouTube and various other apps. On a PC/laptop, you would be using a browser, game launchers to start your favorite games and IDEs to develop applications.&lt;/p&gt;
+&lt;p&gt;Many websites you know and love are apps themselves. As an example, the Facebook website is written using the React framework and packaged as a Web application to run in a browser. YouTube and various other websites by Google are written in the Angular framework and packaged as web apps too.&lt;/p&gt;
+&lt;p&gt;To develop any kind of major applications, you would need a PC or a laptop and an IDE installed. There are various kinds of IDEs available based on the programming language and the kind of application you are developing. You would also need various libraries to create your application - lest write the code yourself. Which leads to the problem I&amp;rsquo;ll be tackling in today&amp;rsquo;s post.&lt;/p&gt;
+&lt;h2 id="background"&gt;Background
+&lt;/h2&gt;&lt;p&gt;PCs and laptops sold today run on x86 architecture CPUs made by Intel and AMD. However in recent times, we have started to see a lot of laptops being sold with the CPUs using ARM architecture, which until recently was found only in mobile phones. Not only are these CPUs way more battery efficient, they also allow to wake a laptop from sleep a lot quicker than x86 based laptops. Most notable ARM based laptops are manufactured by Apple, which use the Apple Silicon chips - M1, M2, M3 etc.&lt;/p&gt;
+&lt;p&gt;Like I&amp;rsquo;ve explained before when you are looking to build an application, you&amp;rsquo;d need various libraries to write code. Most libraries in the various programming languages are universal, ie. they are compatible to run on the architecture of your machine&amp;rsquo;s CPU. However, there are some libraries which do not run (yet) on an ARM machine.&lt;/p&gt;
+&lt;p&gt;The most notable culprit for this is the &lt;a class="link" href="https://www.npmjs.com/package/ibm_db?ref=localhost" target="_blank" rel="noopener"
+&gt;ibm_db&lt;/a&gt; library on Node. If you try to install that package on your Apple Silicon mac, you will see this error:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632.jpeg"
+width="2000"
+height="212"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632_hu_702f32f70657ac3d.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_9da41139-2d53-4bff-aa5e-8708e6bf7632_hu_7545e4898176640b.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="943"
+data-flex-basis="2264px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Error installing ibm_db directly on the Apple Silicon MacBook&lt;/p&gt;
+&lt;p&gt;Yup, it suggests to install the x64 version of NodeJS and then use the package. I had so many other NodeJS applications on my machine without ibm_db which were working pretty well, so I did not want to install an inefficient version of NodeJS for my machine. But I also had to work on this important project on the M1 mac for my org. I was in a dilemma. Enter &lt;strong&gt;devcontainers&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id="devcontainers"&gt;Devcontainers
+&lt;/h2&gt;&lt;p&gt;From its website, A devcontainer allows you to use a container as a full-featured development environment. It can be used to run an application, to separate tools, libraries, or runtimes needed for working with a codebase, and to aid in continuous integration and testing.&lt;/p&gt;
+&lt;p&gt;This is very similar to how Python&amp;rsquo;s venv (Virtual Environments) work. Usually, all Python developers need that to do any basic development. But one key difference with devcontainers is that it opens your project folder inside a Docker container, and then any packages you install in the devcontainer remains inside that and does not cross over to your host machine.&lt;/p&gt;
+&lt;p&gt;While the devcontainer spec is Open source and available independently, Visual Studio Code provides an easy way (UI) of doing stuff with it. Using devcontainers, I&amp;rsquo;ll be trying to run my NodeJS app with the ibm_db dependency on my MacBook with Apple Silicon.&lt;/p&gt;
+&lt;h2 id="create-the-virtual-machine"&gt;Create the Virtual Machine
+&lt;/h2&gt;&lt;p&gt;Docker - or for that matter any of the open source containerization software - cannot run as is on a machine without a Linux Kernel. You&amp;rsquo;ll need a Linux virtual machine that acts as the place where all your containers will be run. The simplest solution to do this is to create a VM using &lt;a class="link" href="https://github.com/abiosoft/colima?ref=localhost" target="_blank" rel="noopener"
+&gt;Colima&lt;/a&gt; or &lt;a class="link" href="https://podman.io" target="_blank" rel="noopener"
+&gt;Podman&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Here is the command to create a machine using Colima:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;colima start --cpu &lt;span class="m"&gt;2&lt;/span&gt; --memory &lt;span class="m"&gt;4&lt;/span&gt; --disk &lt;span class="m"&gt;50&lt;/span&gt; --arch aarch64 --vm-type&lt;span class="o"&gt;=&lt;/span&gt;vz --mount-type&lt;span class="o"&gt;=&lt;/span&gt;virtiofs --vz-rosetta --very-verbose
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;The CPU, Memory and Disk parameters should be very obvious here.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--very-verbose&lt;/code&gt; is to see more detailed logging while the VM starts. It is useful to debug if anything is going wrong or not.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--arch aarch64&lt;/code&gt; tells the Lima CLI to create the VM with the ARM64 architecture. You cannot directly create an x86 machine on an ARM MacBook just like that. The next two options will help enable what I want to do.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--vm-type=vz&lt;/code&gt; will use the new MacOS &lt;a class="link" href="https://developer.apple.com/documentation/virtualization?language=objc&amp;amp;ref=localhost" target="_blank" rel="noopener"
+&gt;Virtualization API&lt;/a&gt; to create the VMs.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--vz-rosetta&lt;/code&gt; will use Rosetta translation layer when interacting with the VM.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--mount-type=virtiofs&lt;/code&gt; creates a VM with the virtiofs volume driver. This allows you to share files from your host machine inside the Container.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Using the VZ APIs along with the virtiofs mount enables better performance running the VM.&lt;/p&gt;
+&lt;p&gt;As of Podman 5.1, Rosetta translation layer is supported by default. If you have been using Podman for your other projects but holding back to the emulation issues, you may start using it instead of colima. Here is the command to create and start a similar VM for Podman:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;podman machine init --cpus&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt; --memory&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt; --disk-size&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;50&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;podman machine start
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;It doesn&amp;rsquo;t matter what option you choose, any further steps from hereon are independent of your choice of Containerization Framework.&lt;/p&gt;
+&lt;h2 id="create-base-image-for-the-container"&gt;Create base image for the Container
+&lt;/h2&gt;&lt;p&gt;Devcontainer runs your code inside a Docker container. The basic principle of running a Docker Container requires you to have a base image on top of which any operations can be performed.&lt;/p&gt;
+&lt;p&gt;In this case I want to develop a NodeJS app which utilizes the ibm_db library. So I will need a base image with NodeJS installed. Thankfully, Microsoft provides base Docker images that work well with devcontainers inside VS Code. I&amp;rsquo;ll be using a base image which comes with NodeJS 20 installed.&lt;/p&gt;
+&lt;p&gt;To create the base image I will use in my application, I will need to SSH into the Virtual Machine using the command and then create the base image from there. If you try to create the base image from your host terminal, the image gets created with the ARM architecture, which is not helpful for us as we want the image with an x86 architecture.&lt;/p&gt;
+&lt;p&gt;This is the &lt;code&gt;Dockerfile&lt;/code&gt; I will be using:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-dockerfile" data-lang="dockerfile"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;--platform=linux/amd64&lt;/span&gt; mcr.microsoft.com/devcontainers/typescript-node:20-bookworm &lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;&lt;/span&gt;&lt;span class="k"&gt;RUN&lt;/span&gt; uname -a&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Dockerfile contents&lt;/p&gt;
+&lt;p&gt;To create the image, run the following commands:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;colima ssh&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;export DOCKER_DEFAULT_PLATFORM=linux/amd64&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Command to build image:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;docker build --no-cache --platform linux/amd64 --progress plain -t node20-amd64-localhost:latest .&lt;/code&gt; (For Colima)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;podman build --no-cache --platform linux/amd64 --progress plain -t node20-amd64-localhost:latest .&lt;/code&gt; (For Podman)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;exit&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Once you build this image, you should see the output like below for the &lt;code&gt;uname&lt;/code&gt; command. If you don&amp;rsquo;t see the &lt;code&gt;x86_64&lt;/code&gt; like I&amp;rsquo;ve highlighted, then you might have not followed the guide properly:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630.jpeg"
+width="1544"
+height="116"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630_hu_5d64eda0e3526b12.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_dbc607e1-1bb5-4bc5-bf36-3f71b5774630_hu_3541994a93088819.jpeg 1024w"
+loading="lazy"
+alt="Output from Colima VM"
+class="gallery-image"
+data-flex-grow="1331"
+data-flex-basis="3194px"
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;PS: If you are using Podman and had a Podman VM created before installing v5.1, you may have to delete that VM and create another one in its place&lt;/em&gt; &lt;em&gt;&lt;strong&gt;if you don&amp;rsquo;t see x86_64&lt;/strong&gt;&lt;/em&gt; &lt;em&gt;as highlighted above. That will ensure that any new VMs created will have Rosetta translation layer by default.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="run-your-project-inside-a-devcontainer"&gt;Run your project inside a Devcontainer
+&lt;/h2&gt;&lt;p&gt;I won&amp;rsquo;t be using any sample project for this article, as you may use any of your x86 based projects you wish to emulate inside a Devcontainer. To do that, you will need to create a folder called &lt;code&gt;.devcontainer&lt;/code&gt;, inside which you need to have two files: &lt;code&gt;devcontainer.json&lt;/code&gt; and &lt;code&gt;Dockerfile&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The contents of the &lt;code&gt;Dockerfile&lt;/code&gt; is a single line which uses the base image that we had built in one of the previous sections:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-dockerfile" data-lang="dockerfile"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;--platform=linux/amd64&lt;/span&gt; node20-amd64-localhost:latest&lt;span class="err"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;The &lt;code&gt;devcontainer.json&lt;/code&gt; would contain the following contents (Please do not copy the comments as is, it is only meant to explain what each line does:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;NodeJS with Typescript installed to build angular apps using x86-only libraries&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;dockerfile&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Dockerfile&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;runArgs&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-v&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;${localWorkspaceFolder}:/workspace:cached&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;customizations&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;vscode&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;extensions&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s2"&gt;&amp;#34;ms-azuretools.vscode-docker&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;remoteUser&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;root&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;forwardPorts&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;In line 4, &lt;code&gt;${localWorkspaceFolder}&lt;/code&gt; refers to your project&amp;rsquo;s location on the host machine, &lt;code&gt;/workspace&lt;/code&gt; is where your project files be mounted inside the devcontainer and the &lt;code&gt;:cached&lt;/code&gt; option is used to improve performance in Docker when mounting volumes.&lt;/p&gt;
+&lt;p&gt;I want to use the user &lt;code&gt;root&lt;/code&gt; inside my devcontainer so that I don&amp;rsquo;t need to do a &lt;code&gt;sudo&lt;/code&gt; everytime to install an npm package inside the container. I&amp;rsquo;m forwarding the port 3000 from my container to my host machine as my NodeJS express app uses that port to listen onto requests.&lt;/p&gt;
+&lt;p&gt;Once you are done with these two files, open your project inside VSCode, then install the &lt;a class="link" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers&amp;amp;ref=localhost" target="_blank" rel="noopener"
+&gt;Devcontainers&lt;/a&gt; extension, Reload the window, press Cmd+Shift+P and then type &lt;code&gt;Reopen in Container&lt;/code&gt; and click on that option. This will build your Container image, mount your project and make it available inside &lt;code&gt;/workspace&lt;/code&gt; in the container and then you should be able to emulate projects using x86 libraries inside the devcontainer on your machine.&lt;/p&gt;
+&lt;p&gt;To test that it works, I will try to install the &lt;code&gt;ibm_db&lt;/code&gt; package from within the container, and here&amp;rsquo;s how that went:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468.jpeg"
+width="1212"
+height="452"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468_hu_4396c3ad44e6766b.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_7c5e0791-1363-4fd2-acb1-caafad5f6468_hu_9e1f87fa77a9adfd.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="268"
+data-flex-basis="643px"
+&gt;&lt;/p&gt;
+&lt;p&gt;That went nicely. Now I need to run my app and see whether it is able to connect to my Database using this library or not:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c.jpeg"
+width="1320"
+height="228"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c_hu_e9d9cf43596a800f.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_3cb9bb56-1433-45e0-ad11-b0a25fe83e9c_hu_4686045eae16777c.jpeg 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="578"
+data-flex-basis="1389px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Yup it did connect well.&lt;/p&gt;
+&lt;h3 id="why-am-i-using-colima"&gt;Why am I using Colima
+&lt;/h3&gt;&lt;p&gt;Colima has support for emulating x86 based VMs using the Rosetta 2 translation layer on Apple Silicon Macs. This is important as we needed ibm_db to work. I also think that building x86 images on ARM platforms will become common, as soon as ARM based laptops from Apple and others start becoming mainstream.&lt;/p&gt;
+&lt;p&gt;Moreover, I&amp;rsquo;ve not yet found another easier way to create and run a Docker machine using CLI commands. Of course there&amp;rsquo;s Docker Desktop which gives a nice GUI, but its &lt;a class="link" href="https://www.docker.com/blog/updating-product-subscriptions/?ref=localhost" target="_blank" rel="noopener"
+&gt;license change&lt;/a&gt; in 2022 wrecked havoc on many companies. Our org had to ban the installs of Docker Desktop completely. I have had to migrate to Podman &lt;a class="link" href="https://blog.sparker0i.me/podman-best-docker-alternative/?ref=localhost" target="_blank" rel="noopener"
+&gt;in the past&lt;/a&gt; due to this. &lt;del&gt;While it was fun, it didn&amp;rsquo;t help me solve my problem. Which brings us to:&lt;/del&gt; Podman v5.1 now supports the Rosetta translation layer.&lt;/p&gt;
+&lt;h3 id="why-not-qemu"&gt;Why not QEMU?
+&lt;/h3&gt;&lt;p&gt;I did try using QEMU based emulation by typing &lt;code&gt;colima start --arch x86_64 -p qemu&lt;/code&gt; but, While that worked okay, as in it started the container and I was able to run my app, I discovered that for my NodeJS based application it wasn&amp;rsquo;t really as efficient. Also, my M1 MacBook was heating up like it hadn&amp;rsquo;t done ever before. What is the point of having an M1 Mac if it&amp;rsquo;s going to behave the same as the Intel ones. Thus I felt using Rosetta based emulation was better for me.&lt;/p&gt;
+&lt;h3 id="colima-vs-podman"&gt;Colima vs Podman
+&lt;/h3&gt;&lt;p&gt;I&amp;rsquo;ve updated the blog post in June 2024 with the instructions for Podman as well. Thus a performance comparison between both options was also needed. In real world performance on your Apple Silicon based machine, you will not notice any difference between using your projects with a Docker VM (through Colima) or a Podman VM.&lt;/p&gt;
+&lt;p&gt;If you have a keen eye though, you&amp;rsquo;d notice that operations with Podman did finish 1-2s faster than on Colima. Even building the first &lt;code&gt;node20-amd64&lt;/code&gt; image on Podman took 2s lesser than that on Colima, despite using the same internet for both. If I were to make a guess, it could be due to one peculiar output I noticed when creating the first image on the Podman VM.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0.jpeg"
+width="1598"
+height="92"
+srcset="https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0_hu_66f484125ea574d9.jpeg 480w, https://blog.sparker0i.me/running-vs-code-devcontainers-with-x86-runtime-apple-silicon/661c07fb9bb70e9dac2bfedf_586a406d-2e96-4a6e-a747-f8d0701d3ea0_hu_b28c58af807dfc44.jpeg 1024w"
+loading="lazy"
+alt="Output from Podman VM"
+class="gallery-image"
+data-flex-grow="1736"
+data-flex-basis="4168px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Here I can see two things: &lt;code&gt;SMP&lt;/code&gt; and &lt;code&gt;PREEMPT_DYNAMIC&lt;/code&gt;, which were not available when I created the VM inside Colima. With a simple Google Search, I found &lt;a class="link" href="https://learn.farizizwan.com/infrastructure/system-administration-linux/redhat-derivatives/smp-preempt_dynamic-definitions" target="_blank" rel="noopener"
+&gt;this website&lt;/a&gt; which helped explain both these things. In a nutshell, a combination of both those strings allows you to utilize resources better while providing better responsiveness.&lt;/p&gt;
+&lt;h3 id="how-about-windows"&gt;How about Windows?
+&lt;/h3&gt;&lt;p&gt;While ARM based Windows laptops are set to make a debut later in 2024, I don&amp;rsquo;t believe there will be too much to be done to get it to work. There&amp;rsquo;s WSL which exists already, and one has to watch out how the x86 emulation plays out on these ARM machines using the Snapdragon X chips. If that ends up like how Rosetta has played out so far, all we&amp;rsquo;ll need is for WSL and its distros to support doing the same as well. Things are not yet clear on that front, and I will try to update my article as soon as the picture is clear.&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion
+&lt;/h2&gt;&lt;p&gt;Right now I&amp;rsquo;ve just shown one example where I had to run an NodeJS app with x86 libraries on an M1 based Mac without spinning up a full fledged VM like inside VirtualBox or VMWare. You can also extend this concept to various other languages having x86-only libraries like Python etc.&lt;/p&gt;</description></item></channel></rss>

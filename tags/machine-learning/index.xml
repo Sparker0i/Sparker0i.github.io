@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Machine Learning on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/machine-learning/</link><description>Recent content in Machine Learning on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 14 Apr 2024 17:43:28 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/machine-learning/index.xml" rel="self" type="application/rss+xml"/><item><title>Cool Spark ML - Part 2: Preprocessing of Data</title><link>https://blog.sparker0i.me/spark-ml-data-preprocessing/</link><pubDate>Sat, 06 Jun 2020 08:02:00 +0000</pubDate><guid>https://blog.sparker0i.me/spark-ml-data-preprocessing/</guid><description>&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47.png" alt="Featured image of post Cool Spark ML - Part 2: Preprocessing of Data" /&gt;&lt;p&gt;&lt;em&gt;Note: This is the second article of the series: Cool Spark ML. The other parts can be found below:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class="link" href="https://blog.sparker0i.me/spark-machine-learning-knn/" target="_blank" rel="noopener"
+&gt;Part 1: K Nearest Neighbours&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 2: Preprocessing of Data (current)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;People who have been performing Machine Learning for quite a long time know that Data Preprocessing is a key step before running any algorithms on the data. In a majority of datasets, you might always find null, or incomplete values. The data would also be inconsistent across columns, which directly affects algorithms using distance measures.&lt;/p&gt;
+&lt;p&gt;This is where Data Preprocessing comes in. It is a crucial step which involves cleaning and organizing the data to make it suitable for building models. In other words, if you don&amp;rsquo;t perform Preprocessing, your models may not be accurate.&lt;/p&gt;
+&lt;p&gt;While there are quite a lot of articles online about Data Preprocessing in Python, there aren&amp;rsquo;t a lot of them in Spark, or even Scala. In this post, I will be dealing with the ways you can perform Data Preprocessing in Spark on Scala.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;PS. You might be asking why I&amp;rsquo;m dealing with this now when I have actually written KNN in Spark before. The truth is, KNN isn&amp;rsquo;t officially supported inside Spark ML module. What I wrote in the previous article was a top-to-bottom version of KNN performed using Spark. You can also say that I&amp;rsquo;m doing a complete reset of this series 😅&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Just like always, the codes for all posts in this series will be available on &lt;a class="link" href="https://github.com/Sparker0i/Cool-Spark-ML?ref=localhost" target="_blank" rel="noopener"
+&gt;my GitHub repo&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="types-of-preprocessing-in-spark"&gt;Types of Preprocessing in Spark
+&lt;/h2&gt;&lt;p&gt;There are two types of preprocessing:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Numeric Data&lt;/li&gt;
+&lt;li&gt;Text Data&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="numeric-data"&gt;Numeric Data
+&lt;/h2&gt;&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_013c380e-319f-4422-a230-92cd5dce8c9e.png"
+width="744"
+height="291"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_013c380e-319f-4422-a230-92cd5dce8c9e_hu_a661649faac3f5a4.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_013c380e-319f-4422-a230-92cd5dce8c9e_hu_12db0115b3c706bb.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="255"
+data-flex-basis="613px"
+&gt;&lt;/p&gt;
+&lt;p&gt;There are three ways you can preprocess numeric data in Spark:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Normalize&lt;/li&gt;
+&lt;li&gt;Standardize&lt;/li&gt;
+&lt;li&gt;Bucketize&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To illustrate Normalize and Standardize, I&amp;rsquo;ll be using some Scala magic which will generate my points as a Vector. Each vector represents a point in a 3-Dimensional Space.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;points&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nc"&gt;Vectors&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dense&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nc"&gt;Array&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;1.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10000&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mf"&gt;1000.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;featuresDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;points&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toDF&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;features&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Doing the above results in the following &lt;code&gt;DataFrame&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_cef59b8a-1ff3-44fe-ab23-93a073b574e3.png"
+width="577"
+height="508"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_cef59b8a-1ff3-44fe-ab23-93a073b574e3_hu_e44d68fae859d626.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_cef59b8a-1ff3-44fe-ab23-93a073b574e3_hu_6122e23b16f7d93.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="113"
+data-flex-basis="272px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Each element inside Features column represents a point in a 3-D space.&lt;/p&gt;
+&lt;h3 id="normalize"&gt;Normalize
+&lt;/h3&gt;&lt;p&gt;Normalization is the process of mapping numeric data from their original range into a range of 0 to 1. The lowest value of the original range gets value of 0, and the highest gets the value 1. All the other values in the original range will fall between these two.&lt;/p&gt;
+&lt;p&gt;This is important because there may be multiple attributes with different ranges. &lt;em&gt;E.g. Salary values may range between 3 and 8+ digit numbers, years in company will be between 1- and 2-digit numbers.&lt;/em&gt; The reason we want to normalize those attributes in a &lt;code&gt;[0,1]&lt;/code&gt; range is so that when algorithms that use distance as a measure, they don&amp;rsquo;t weigh some attributes like salary more heavily than others.&lt;/p&gt;
+&lt;p&gt;The formula to convert values in an un-normalized column to a normalized form is given by:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_03103cb8-0d5d-4960-b635-33c1a62ec52c.png"
+width="220"
+height="88"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_03103cb8-0d5d-4960-b635-33c1a62ec52c_hu_5c8f5f3c3406b51f.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_03103cb8-0d5d-4960-b635-33c1a62ec52c_hu_bf30bc0d48a5c834.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="250"
+data-flex-basis="600px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Normalization Formula&lt;/p&gt;
+&lt;p&gt;Where:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;x&lt;/code&gt; is the value inside a column to be normalized,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x(new)&lt;/code&gt; is the normalized value,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x(min)&lt;/code&gt; is the minimum value of that column, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x(max)&lt;/code&gt; is the maximum value of that column&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Working on the &lt;code&gt;featuresDf&lt;/code&gt; created above, we will import &lt;code&gt;MinMaxScaler&lt;/code&gt; from the &lt;code&gt;org.apache.spark.ml.feature&lt;/code&gt; package. We now have to create an instance of the &lt;code&gt;MinMaxScaler&lt;/code&gt;. It will take two parameters: Input column name, and an Output Column name. This object will transform the contents of the input column vectors into a scaled version, and save it into the output column.&lt;/p&gt;
+&lt;p&gt;In our case, we will be using our &lt;code&gt;features&lt;/code&gt; column inside &lt;code&gt;featuresDf&lt;/code&gt; as the input column, and our output column will be named &lt;code&gt;sFeatures&lt;/code&gt;. We create the instance in this manner:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;featureScaler&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;MinMaxScaler&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;features&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;sfeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Next, we have to &lt;code&gt;fit&lt;/code&gt; the data present in our &lt;code&gt;featuresDf&lt;/code&gt; inside this &lt;code&gt;featureScaler&lt;/code&gt; and later &lt;code&gt;transform&lt;/code&gt; to create the scaled data. This is done using the code below:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;scaledDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;featureScaler&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fit&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;featuresDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;featuresDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Transforming original values into normalized ones&lt;/p&gt;
+&lt;p&gt;Now, if we have a look at our transformed data:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_58d6eebe-732e-499e-8cb9-08961bd34c03.png"
+width="1170"
+height="499"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_58d6eebe-732e-499e-8cb9-08961bd34c03_hu_47ff0effba0c7922.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_58d6eebe-732e-499e-8cb9-08961bd34c03_hu_f07a2e91d95b1737.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="234"
+data-flex-basis="562px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Normalized &lt;code&gt;DataFrame&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;You can then use this new &lt;code&gt;sFeatures&lt;/code&gt; to calculate distances among points.&lt;/p&gt;
+&lt;h3 id="standardize"&gt;Standardize
+&lt;/h3&gt;&lt;p&gt;Now, we may have data whose values can be mapped to a bell-shaped curve, or normally distributed but maybe not exactly. With standardization, we map our data and transform it, which has a variance of 1 and/or a mean value of 0. This is done because some machine learning algorithms, like SVM, work better this way.&lt;/p&gt;
+&lt;p&gt;Thus, what happens is when we apply standardization, our data is slightly shifted in its shape so that it becomes more normalized, or more like a bell curve. The formula to convert values in a non-standardized column to a standardized form is given by:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_af201ed8-65e8-4341-8861-fde84255b7ea.png"
+width="214"
+height="87"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_af201ed8-65e8-4341-8861-fde84255b7ea_hu_e9428b7044f5744d.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_af201ed8-65e8-4341-8861-fde84255b7ea_hu_76b46cd750961242.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="245"
+data-flex-basis="590px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Standardization Formula&lt;/p&gt;
+&lt;p&gt;Where:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;x&lt;/code&gt; is the value to be standardized&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x(new)&lt;/code&gt; is the standardized value&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;μ&lt;/code&gt; is the mean of the column&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;σ&lt;/code&gt; is the standard deviation of the column.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Again, we will be using the &lt;code&gt;featuresDf&lt;/code&gt; created above. We will import &lt;code&gt;StandardScaler&lt;/code&gt; from the &lt;code&gt;org.apache.spark.ml.feature&lt;/code&gt; package. Just like &lt;code&gt;MinMaxScaler&lt;/code&gt;, an instance of &lt;code&gt;StandardScaler&lt;/code&gt; will require an input column and an output column. In our case, we will still continue with &lt;code&gt;features&lt;/code&gt; and &lt;code&gt;sFeatures&lt;/code&gt;. We will then &lt;code&gt;fit&lt;/code&gt; the data inside the scaler and later &lt;code&gt;transform&lt;/code&gt; the data. I&amp;rsquo;ve combined both these steps into a single code snippet:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;featureStandardScaler&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;StandardScaler&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;features&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;sfeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setWithStd&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setWithMean&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;standardizedDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;featureStandardScaler&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fit&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;featuresDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;featuresDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now if we have a look at our transformed data:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_069f19b3-5a7d-4b8a-bb0f-6875947e17ff.png"
+width="1168"
+height="495"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_069f19b3-5a7d-4b8a-bb0f-6875947e17ff_hu_4df59158823a7545.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_069f19b3-5a7d-4b8a-bb0f-6875947e17ff_hu_86937542ea1a8ac7.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="235"
+data-flex-basis="566px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Standardized Numeric Data&lt;/p&gt;
+&lt;p&gt;Wait, weren&amp;rsquo;t the values supposed to be scaled within the range of &lt;code&gt;[-1, 1]&lt;/code&gt;? Well, that&amp;rsquo;s the surprise associated with the &lt;code&gt;StandardScaler&lt;/code&gt;. It uses the unbiased sample standard deviation instead of the population standard deviation.&lt;/p&gt;
+&lt;p&gt;In other words, while the standard deviation will be 1 (or very close to 1), the mean may not be necessarily 0. To scale your data in a way that the range of numbers is between &lt;code&gt;[-1,1]&lt;/code&gt; and the standard deviation is 1 and mean 0, you will have to follow &lt;a class="link" href="https://stackoverflow.com/a/51755387/2451763?ref=localhost" target="_blank" rel="noopener"
+&gt;this accepted StackOverflow answer&lt;/a&gt;. Even otherwise with this process, the data has been standardized.&lt;/p&gt;
+&lt;h3 id="bucketize"&gt;Bucketize
+&lt;/h3&gt;&lt;p&gt;Bucketization is done when we have to organize continuous ranges of data into different buckets. &lt;code&gt;Bucketizer&lt;/code&gt; allows us to group data based on boundaries, so a list of boundaries has to be provided. I will call it &lt;code&gt;splits&lt;/code&gt; with the domain of all buckets when added looks like: &lt;code&gt;{(-∞, -500.0) ⋃ [-500.0, -100.0) ⋃ [-100.0, -10.0) ⋃ [-10.0, 0.0) ⋃ [0.0, 10.0) ⋃ [10.0, 100.0) ⋃ [100.0, 500.0) ⋃ [500.0, ∞)}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Then I&amp;rsquo;ll generate 1000 random points that fall in the range of &lt;code&gt;[-10000.0, 10000.0]&lt;/code&gt; and save it in a &lt;code&gt;DataFrame&lt;/code&gt; with column name as &lt;code&gt;features&lt;/code&gt;. This is done using the below code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;splits&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;Array&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nc"&gt;Float&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;NegativeInfinity&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;500.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;100.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;10.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;10.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;500.0&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nc"&gt;Float&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;PositiveInfinity&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;bucketData&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="k"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="mi"&gt;10000&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;yield&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;10000.0&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;bucketDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;bucketData&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toDF&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;features&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now, our &lt;code&gt;Bucketizer&lt;/code&gt; needs three inputs: the splits, input column name, and output column name. Then I&amp;rsquo;ll &lt;code&gt;transform&lt;/code&gt; that data which would then give me the element and which bucket it belongs to:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;bucketizer&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;Bucketizer&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setSplits&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;splits&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;features&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;bfeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;bucketedDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;bucketizer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bucketDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Notice that I didn&amp;rsquo;t have to do a &lt;code&gt;fit&lt;/code&gt; operation before doing a &lt;code&gt;transform&lt;/code&gt;. This is because Bucketizing is fairly simple and you only need to find which bucket a number belongs to. Thus, there are no operations like scaling which happened in the other 2 sections, and hence you don&amp;rsquo;t need to &lt;code&gt;fit&lt;/code&gt; your data. Now if we have a look at the created &lt;code&gt;DataFrame&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_0fb28aab-611f-48ed-8abe-1c8794d3c20f.png"
+width="298"
+height="510"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_0fb28aab-611f-48ed-8abe-1c8794d3c20f_hu_f998aa47506f8847.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_0fb28aab-611f-48ed-8abe-1c8794d3c20f_hu_796a64ef7381ef30.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="58"
+data-flex-basis="140px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Bucketized DataFrame&lt;/p&gt;
+&lt;p&gt;Now you might also want to know how many numbers are there in a particular bucket. So, I will do a &lt;code&gt;groupBy&lt;/code&gt; on &lt;code&gt;bFeatures&lt;/code&gt; column and retrieve the count of occurrences. The following code does that and displays my generated data:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5ae7705a-2089-45b7-8f55-be6804bdda60.png"
+width="160"
+height="231"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5ae7705a-2089-45b7-8f55-be6804bdda60_hu_ec9c2eab740d4bf2.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5ae7705a-2089-45b7-8f55-be6804bdda60_hu_7949b11a7e5f43a8.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="69"
+data-flex-basis="166px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Fairly easy, isn&amp;rsquo;t it?&lt;/p&gt;
+&lt;h2 id="text"&gt;Text
+&lt;/h2&gt;&lt;p&gt;There are two ways in which you can preprocess text-based data in Spark:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tokenize&lt;/li&gt;
+&lt;li&gt;TF-IDF&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To illustrate both of them, I will be using &lt;code&gt;sentencesDf&lt;/code&gt; created using this code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;sentencesDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;Seq&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;This is an introduction to Spark ML&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;MLLib includes libraries for classification and regression&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;),&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;It also contains supporting tools for pipelines&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;).&lt;/span&gt;&lt;span class="n"&gt;toDF&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;sentence&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="tokenize"&gt;Tokenize
+&lt;/h3&gt;&lt;p&gt;In tokenization, you map your string containing a sentence into a set of tokens, or words. As an Example, the sentence &lt;em&gt;&amp;ldquo;This is an introduction to Spark ML&amp;rdquo;&lt;/em&gt; can be mapped into a list of 7 words - &lt;code&gt;{This, is, an, introduction, to, Spark, ML}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We will first import &lt;code&gt;Tokenizer&lt;/code&gt; from the &lt;code&gt;org.apache.spark.ml.feature&lt;/code&gt; package. Now an instance of this will need two parameters - input column and output column. Our input will be &lt;code&gt;sentence&lt;/code&gt; and the output will be &lt;code&gt;words&lt;/code&gt;, because that is what the &lt;code&gt;Tokenizer&lt;/code&gt; will produce. Then we will apply &lt;code&gt;transform&lt;/code&gt; on the sentences above.&lt;/p&gt;
+&lt;p&gt;Now, just like bucketing, we are not &lt;code&gt;fit&lt;/code&gt;ting any data here. &lt;code&gt;Tokenizer&lt;/code&gt; already knows its job - Split strings into the separate words. The above process is illustrated in the code below:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;sentenceToken&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;Tokenizer&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;sentence&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;words&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;sentenceTokenizedDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sentenceToken&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sentencesDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now, if we have a look at our data:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_34e46d62-61a0-4814-aa63-461ded227671.png"
+width="1195"
+height="164"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_34e46d62-61a0-4814-aa63-461ded227671_hu_92a327a34d5cae14.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_34e46d62-61a0-4814-aa63-461ded227671_hu_8584960d546cd83a.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="728"
+data-flex-basis="1748px"
+&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;words&lt;/code&gt; column contains lists of words that have been broken up in the ways you would expect a regular expression pattern matching to break up a sentence into words - based on white space, punctuation, etc.&lt;/p&gt;
+&lt;p&gt;Easy, isn&amp;rsquo;t it?&lt;/p&gt;
+&lt;h3 id="term-frequency-inverse-document-frequency-tf-idf"&gt;Term Frequency-Inverse Document Frequency (TF-IDF)
+&lt;/h3&gt;&lt;p&gt;Here we map text from a single, typically long string, to a vector, indicating the frequency of each word in a text relative to a group of texts such as a corpus. This transformation is widely used in text classification.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_932f49cd-4e0a-403b-918d-968c1151c804.png"
+width="820"
+height="433"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_932f49cd-4e0a-403b-918d-968c1151c804_hu_23ab18036869a4d7.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_932f49cd-4e0a-403b-918d-968c1151c804_hu_e2319ff2c75b6f56.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="189"
+data-flex-basis="454px"
+&gt;&lt;/p&gt;
+&lt;p&gt;TF-IDF captures the intuition that infrequently used words are more useful for distinguishing categories of text than frequently used words. Considering the above figure as an example, &lt;em&gt;Normalizing&lt;/em&gt; appears only once, &lt;em&gt;to&lt;/em&gt; appears twice and so on. Like this, we go through all the documents in our corpus, which is nothing but a collection of documents. Then we count up how often a term appears across all of the documents. In this example &lt;em&gt;normalizing&lt;/em&gt; is a very rare word. Whereas other words like &lt;em&gt;maps, data&lt;/em&gt; and &lt;em&gt;to&lt;/em&gt; show up more frequently. We use these two sets of counts and feed those two into the term frequency-inverse document frequency calculation. And that gives us our TF-IDF measures.&lt;/p&gt;
+&lt;p&gt;I will use the same &lt;code&gt;sentenceTokenizedDf&lt;/code&gt; created above for this exercise as well. Just like other processes mentioned above, we will need to import a few things from &lt;code&gt;org.apache.spark.ml.feature&lt;/code&gt; package - &lt;code&gt;HashingTF&lt;/code&gt; (for hashing Term Frequency), &lt;code&gt;IDF&lt;/code&gt; (for Inverse Document Frequency), &lt;code&gt;Tokenizer&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;First, I will create a &lt;code&gt;HashingTF&lt;/code&gt; instance - which takes an input column (&lt;code&gt;words&lt;/code&gt;), an output column (&lt;code&gt;rawFeatures&lt;/code&gt;) and the number of features to keep track of (&lt;code&gt;20&lt;/code&gt;) as the parameters. Now we apply our &lt;code&gt;transform&lt;/code&gt;ation on this and get a new &lt;code&gt;DataFrame&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;hashingTF&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;HashingTF&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;words&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;rawFeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setNumFeatures&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;sentenceHashingFunctionTermFrequencyDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hashingTF&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sentenceTokenizedDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sentenceHashingFunctionTermFrequencyDf&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now if we have a look at our data, it has added an extra column which is of &lt;code&gt;Vector&lt;/code&gt; type. It has mapped each word to an index, so for example, &lt;em&gt;this&lt;/em&gt; maps to 1, &lt;em&gt;is&lt;/em&gt; maps to 4, &lt;em&gt;an&lt;/em&gt; -&amp;gt; 5, and so on.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5a42bed0-8330-4ea2-9c07-50730eacf3d8.png"
+width="1688"
+height="154"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5a42bed0-8330-4ea2-9c07-50730eacf3d8_hu_dc939f94e76812db.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_5a42bed0-8330-4ea2-9c07-50730eacf3d8_hu_c57048eb454f7550.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="1096"
+data-flex-basis="2630px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Now we&amp;rsquo;re going to scale the &lt;code&gt;rawFeatures&lt;/code&gt; vector values and we&amp;rsquo;re going to scale them based on how often the words appear in the entire collection of sentences. To do this we&amp;rsquo;re going to create an &lt;code&gt;IDF&lt;/code&gt; instance. Again, we have to specify an input column (&lt;code&gt;rawFeatures&lt;/code&gt;) and an output column (&lt;code&gt;idfFeatures&lt;/code&gt;) as parameters.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s use the term frequency data we just calculated to &lt;code&gt;fit&lt;/code&gt; the inverse document frequency model. And to do that I&amp;rsquo;m going to create an &lt;code&gt;idfModel&lt;/code&gt;, and we&amp;rsquo;re going to call the &lt;code&gt;idf&lt;/code&gt; object I just created, and I&amp;rsquo;m going to fit it using our term frequency data. Then we apply the IDF &lt;code&gt;transform&lt;/code&gt;ation to create a new &lt;code&gt;DataFrame&lt;/code&gt; that has both the term frequency and the inverse document frequency transformations applied.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-scala" data-lang="scala"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;idf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nc"&gt;IDF&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setInputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;rawFeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setOutputCol&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;idfFeatures&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;idfModel&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;idf&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fit&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sentenceHashingFunctionTermFrequencyDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;val&lt;/span&gt; &lt;span class="n"&gt;tfIdfDf&lt;/span&gt; &lt;span class="k"&gt;=&lt;/span&gt; &lt;span class="n"&gt;idfModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;transform&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sentenceHashingFunctionTermFrequencyDf&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Now if we have a look at our data (I&amp;rsquo;m selecting only the &lt;code&gt;rawFeatures&lt;/code&gt; and &lt;code&gt;idfFeatures&lt;/code&gt; columns to fit in the screen):&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_14c44800-1c47-461b-84cf-084d26a3606a.png"
+width="1871"
+height="159"
+srcset="https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_14c44800-1c47-461b-84cf-084d26a3606a_hu_ab78ff15b2aad54.png 480w, https://blog.sparker0i.me/spark-ml-data-preprocessing/661c082397510b44fe969e47_14c44800-1c47-461b-84cf-084d26a3606a_hu_b8b1bede67a8fffe.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="1176"
+data-flex-basis="2824px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Now we have a new column which contains the inverse document frequency features. These are measures of each word relative to how frequently they occur in the entire corpus. In our case our corpus is just three sentences.&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;CONCLUSION
+&lt;/h2&gt;&lt;p&gt;Preprocessing is indeed a tough challenge where you will have to know what kinds of data you might get and what kinds of processing you want to apply on your data. If not done properly, your machine learning models might not be of much use.&lt;/p&gt;</description></item><item><title>Cool Spark ML: K Nearest Neighbors</title><link>https://blog.sparker0i.me/spark-machine-learning-knn/</link><pubDate>Sun, 19 Apr 2020 05:41:03 +0000</pubDate><guid>https://blog.sparker0i.me/spark-machine-learning-knn/</guid><description>&lt;img src="https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc.png" alt="Featured image of post Cool Spark ML: K Nearest Neighbors" /&gt;&lt;p&gt;&lt;em&gt;Note: This article is the first of the Series: Cool Spark ML. Other parts are coming soon.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;I had taken up a few machine learning courses in my college throughout 2018. Most of the problems there were solved using Python and the necessary libraries - NumPy, Pandas, Scikit-Learn and Matplotlib. With my daily work at IBM now requiring me to use Scala and Spark, I decided to use my free time during the lockdown to try out Spark ML.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: All the codes in the Cool Spark ML Series will be available on&lt;/em&gt; &lt;a class="link" href="https://github.com/Sparker0i/Cool-Spark-ML?ref=localhost" target="_blank" rel="noopener"
+&gt;&lt;em&gt;my GitHub repo&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="intro-to-spark-ml"&gt;Intro to Spark ML
+&lt;/h3&gt;&lt;p&gt;As the name suggests, Spark ML is the Machine Learning library consisting of common Machine learning algorithms - classification, regression, clustering etc.&lt;/p&gt;
+&lt;h3 id="why-spark-ml"&gt;Why Spark ML?
+&lt;/h3&gt;&lt;p&gt;Pandas - a Python library - won’t work every time. It is a single machine tool, so it&amp;rsquo;s constrained by the machine&amp;rsquo;s limits. Moreover, pandas doesn’t have any parallelism built in, which means it uses only one CPU core. You may hit a dead-end on datasets of the size of a few gigabytes. Pandas won&amp;rsquo;t help if you want to work on very big datasets.&lt;/p&gt;
+&lt;p&gt;We are now in the Big Data era, where gigabytes of data are generated every few seconds. Such datasets will require powerful systems to run even the basic machine learning algorithms. The cost of getting such a powerful system will be huge, as well as the costs to scale them up. With distributed computers, such calculations can be sent to multiple low-end machines, which prevents the cost of getting a single high-end machine.&lt;/p&gt;
+&lt;p&gt;This is where Spark kicks in. Spark has the concept of &lt;code&gt;DataFrame&lt;/code&gt; (now deprecated in favor of Datasets), which behaves very similar to how a Pandas &lt;code&gt;DataFrame&lt;/code&gt; would do, including having very similar APIs too. The advantage of using Spark &lt;code&gt;DataFrame&lt;/code&gt; is that it was designed from ground-up to support Big Data. Spark can also distribute such &lt;code&gt;DataFrame&lt;/code&gt;s across multiple machines and collect the calculated results.&lt;/p&gt;
+&lt;h3 id="knn-k-nearest-neighbors"&gt;KNN: K-Nearest Neighbors
+&lt;/h3&gt;&lt;p&gt;The process in KNN is pretty simple. You load your entire dataset first, each of which will have input columns and one output column. This is then split into a training set and a testing set. You then use your training set to train your model, and then use the testing set to predict the output column value by testing it against the model. You then compare the actual and the predicted target values and calculate the accuracy of your model.&lt;/p&gt;
+&lt;h3 id="problem-definition"&gt;Problem Definition
+&lt;/h3&gt;&lt;p&gt;We are going to train a model to predict the famous &lt;a class="link" href="http://archive.ics.uci.edu/ml/datasets/iris?ref=localhost" target="_blank" rel="noopener"
+&gt;Iris dataset&lt;/a&gt;. The Iris Flower Dataset involves predicting the flower species given measurements of iris flowers.&lt;/p&gt;
+&lt;p&gt;It is a multiclass classification problem. The number of observations for each class is the same. The dataset is small in size with only 150 rows with 4 input variables and 1 output variable.&lt;/p&gt;
+&lt;p&gt;The 4 features are described as follows:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Sepal-Length, in cm&lt;/li&gt;
+&lt;li&gt;Sepal-Width, in cm&lt;/li&gt;
+&lt;li&gt;Petal-Length, in cm&lt;/li&gt;
+&lt;li&gt;Petal-Width, in cm&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="prerequisites"&gt;Prerequisites
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;Create a Scala project in IntelliJ IDEA based on SBT&lt;/li&gt;
+&lt;li&gt;Select Scala version 2.11.12&lt;/li&gt;
+&lt;li&gt;Include &lt;code&gt;spark-core&lt;/code&gt;, &lt;code&gt;spark-sql&lt;/code&gt; and &lt;code&gt;spark-ml&lt;/code&gt; 2.4.5 as library dependencies in your &lt;code&gt;build.sbt&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="knn-steps"&gt;KNN Steps
+&lt;/h3&gt;&lt;p&gt;In this blog post, I will be developing KNN algorithm from scratch. The process to perform KNN can be broken down into 3 easy steps:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Calculate Euclidean Distance&lt;/li&gt;
+&lt;li&gt;Get Nearest Neighbors&lt;/li&gt;
+&lt;li&gt;Make Predictions&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="step-1-calculate-euclidean-distance"&gt;Step 1: Calculate Euclidean Distance
+&lt;/h3&gt;&lt;p&gt;The first step will be to calculate the distance between two rows in a Dataset. Rows of data are mostly made up of numbers and an easy way to calculate the distance between two rows or vectors of numbers is to draw a straight line.&lt;/p&gt;
+&lt;p&gt;Euclidean Distance is calculated as the square root of the sum of the squared differences between the two vectors, as given in the image below:&lt;/p&gt;
+&lt;p&gt;&lt;a class="link" href="https://www.codecogs.com/eqnedit.php?latex=%5Cinline&amp;amp;space%3B%5Cbg_white=&amp;amp;space%3B%7B%5Ccolor%7BRed%7D=&amp;amp;space%3B%24%24dist_%7Bx_1%2Cx_2%7D=&amp;amp;space%3B=&amp;amp;space%3B%5Csqrt%7B%5Csum_%7Bi=0%7D%5E%7BN%7D&amp;amp;space%3B%28%7Bx_1_i=&amp;amp;space%3B-=&amp;amp;space%3Bx_2_i%7D%29%5E2%7D.%24%24%7D=&amp;amp;ref=localhost" target="_blank" rel="noopener"
+&gt;&lt;img src="https://latex.codecogs.com/gif.latex?%5Cinline&amp;amp;space;%5Cbg_white&amp;amp;space;%7B%5Ccolor%7BRed%7D&amp;amp;space;$$dist_%7Bx_1,x_2%7D&amp;amp;space;=&amp;amp;space;%5Csqrt%7B%5Csum_%7Bi=0%7D%5E%7BN%7D&amp;amp;space;%28%7Bx_1_i&amp;amp;space;-&amp;amp;space;x_2_i%7D%29%5E2%7D.$$%7D"
+loading="lazy"
+&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Where &lt;code&gt;x1&lt;/code&gt; is the first row of data, &lt;code&gt;x2&lt;/code&gt; is the second row of data, and &lt;code&gt;i&lt;/code&gt; is a specific index for a column as we sum across all columns. Smaller the value, more similar will be the two rows.&lt;/p&gt;
+&lt;p&gt;Since we will be reading our data and transforming it using Spark, to compute distances between two &lt;code&gt;Row&lt;/code&gt;s in a &lt;code&gt;DataFrame&lt;/code&gt;, we write the function below in Scala:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;computeEuclideanDistance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;row1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;row2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="n"&gt;Double&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;var&lt;/span&gt; &lt;span class="n"&gt;distance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;0.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;until&lt;/span&gt; &lt;span class="n"&gt;row1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;distance&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;row1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getDouble&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;row2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getDouble&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;math&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sqrt&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;distance&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;You can see that the function assumes that the last column in each row is an output value which is ignored from the distance calculation.&lt;/p&gt;
+&lt;h3 id="step-2-get-nearest-neighbors"&gt;Step 2: Get Nearest Neighbors
+&lt;/h3&gt;&lt;p&gt;Neighbors for a new piece of data in the dataset are the k closest instances, as defined by our distance measure. To locate the neighbors for a new piece of data within a dataset we must first calculate the distance between each record in the dataset to the new piece of data. We can do this using our distance function prepared above.&lt;/p&gt;
+&lt;p&gt;We can do this by keeping track of the distance for each record in the dataset as a tuple, sort the list of tuples by the distance, and then retrieve the neighbors. The below function does this job in Scala:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;getNeighbours&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;trainSet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ne"&gt;Array&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;testRow&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;var&lt;/span&gt; &lt;span class="n"&gt;distances&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mutable&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MutableList&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Double&lt;/span&gt;&lt;span class="p"&gt;)]()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;trainSet&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;foreach&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="n"&gt;trainRow&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;dist&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;computeEuclideanDistance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;trainRow&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;testRow&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;val&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;trainRow&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;dist&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;distances&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;distances&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;distances&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sortBy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;var&lt;/span&gt; &lt;span class="n"&gt;neighbours&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mutable&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MutableList&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;Row&lt;/span&gt;&lt;span class="p"&gt;]()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;neighbours&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;distances&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;_1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;neighbours&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;toList&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="step-3-make-predictions"&gt;Step 3: Make Predictions
+&lt;/h3&gt;&lt;p&gt;The most similar neighbors collected from the training dataset can be used to make predictions. In the case of classification, we can return the most represented output value (Class) among the neighbors.&lt;/p&gt;
+&lt;p&gt;We would first map the class values to the number of times it appears among the neighbors, then sort the counts in descending order and get the most appeared class value. The below function does exactly that in Scala:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;def predictClassification(trainSet: Array[Row], testRow: Row, k: Int): String =
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; val neighbours = getNeighbours(trainSet, testRow, k)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; val outputValues = for (row &amp;lt;- neighbours) yield row.getString(trainSet(0).length - 1)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; outputValues.groupBy(identity)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .mapValues(_.size)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .toSeq
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .sortWith(_._2 &amp;gt; _._2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .head._1
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="apply-the-above-concepts-to-iris-dataset"&gt;Apply the above concepts to Iris Dataset
+&lt;/h3&gt;&lt;p&gt;We will now apply the concepts above to perform KNN on the Iris Dataset.&lt;/p&gt;
+&lt;p&gt;First, we have to load the dataset into the program. This is done using the &lt;code&gt;readCsv&lt;/code&gt; function I&amp;rsquo;ve written below:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;readCsv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fileName&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ne"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;header&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Boolean&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt; &lt;span class="n"&gt;DataFrame&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;spark&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;csv&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;option&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;header&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;header&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;option&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;inferSchema&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;header&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fileName&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repartition&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Class&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;We also have to normalize the data we have. This is because KNN is based on distance between records. Unless data is normalized distance will be incorrectly calculated, because different attributes will not contribute to the distance in a uniform way. Attributes having a larger value range will have an unduly large influence on the distance, because they make greater contribution to the distance. If the dataset requires that some columns be given a greater preference over others, then normalization isn&amp;rsquo;t recommended, but this is not true in the case of the Iris dataset.&lt;/p&gt;
+&lt;p&gt;We use the Z Score Normalization technique. With this, we subtract the mean of the respective column from each cell, and divide that with the standard deviation of that column. &lt;a class="link" href="https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0?ref=localhost" target="_blank" rel="noopener"
+&gt;This&lt;/a&gt; article describes Data Normalization in good detail.&lt;/p&gt;
+&lt;p&gt;The following function does our job:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;def normalizeData(): Unit = {
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; df.columns.filterNot(e =&amp;gt; e == &amp;#34;Class&amp;#34;).foreach{col =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; val (mean_col, stddev_col) = df.select(mean(col), stddev(col))
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .as[(Double, Double)]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .first()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; df = df.withColumn(s&amp;#34;$col.norm&amp;#34;, ($&amp;#34;$col&amp;#34; - mean_col) / stddev_col)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .drop(col)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; .withColumnRenamed(s&amp;#34;$col.norm&amp;#34;, col)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;As you can see above, we are filtering out the class value, because we will not be using this value to compute the distance. There&amp;rsquo;s one problem with our approach though, our KNN functions written above assume that the class value will be the last column. In the way we&amp;rsquo;ve normalized the data, we are dropping the original column, and adding the normalized column in place. This will push the &lt;code&gt;Class&lt;/code&gt; column to the beginning. So, I&amp;rsquo;ve written another function which will move the column back to where it should actually be:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;def moveClassToEnd(): Unit = {
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; val cols = df.columns.filterNot(_ == &amp;#34;Class&amp;#34;) ++ Array(&amp;#34;Class&amp;#34;)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; df = df.select(cols.head, cols.tail: _*)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;We will evaluate our algorithm using K-fold cross-validation with 5 folds. This means that we will have 150/5 = 30 rows per fold. We will use helper functions &lt;code&gt;evaluateAlgorithm()&lt;/code&gt; and &lt;code&gt;accuracyMetric()&lt;/code&gt; to evaluate the algorithm for cross-validation and calculate the accuracy of our predictions respectively.&lt;/p&gt;
+&lt;p&gt;Since Spark does not allow any of its operations inside a Spark transformation, we will have to perform a &lt;code&gt;collect()&lt;/code&gt; on the Train set and Test set &lt;code&gt;DataFrame&lt;/code&gt;s every time before passing it to any function. A sample run with &lt;code&gt;k = 3&lt;/code&gt; produces the following output:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_1316a779-2e73-40a0-aef1-ae450ca01420.png"
+width="383"
+height="64"
+srcset="https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_1316a779-2e73-40a0-aef1-ae450ca01420_hu_85b7fcfa19312aff.png 480w, https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_1316a779-2e73-40a0-aef1-ae450ca01420_hu_1740d1c92b4e1874.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="598"
+data-flex-basis="1436px"
+&gt;&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s go one step further and run our program over different values of &lt;code&gt;k&lt;/code&gt;. I&amp;rsquo;m running it for &lt;code&gt;k&lt;/code&gt; from &lt;code&gt;1 to 10&lt;/code&gt;, and here are some results (this may not be the same everytime):&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_cb17fce4-6f7f-4070-8fc0-ff27ece000e4.png"
+width="682"
+height="585"
+srcset="https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_cb17fce4-6f7f-4070-8fc0-ff27ece000e4_hu_158f5b034d8b9663.png 480w, https://blog.sparker0i.me/spark-machine-learning-knn/661c0843dbf837e5981954cc_cb17fce4-6f7f-4070-8fc0-ff27ece000e4_hu_c5a645ae67b8192d.png 1024w"
+loading="lazy"
+class="gallery-image"
+data-flex-grow="116"
+data-flex-basis="279px"
+&gt;&lt;/p&gt;
+&lt;p&gt;KNN accuracy for a variety of k values&lt;/p&gt;
+&lt;p&gt;You can find the entire code below:&lt;/p&gt;
+&lt;h3 id="conclusion"&gt;CONCLUSION
+&lt;/h3&gt;&lt;p&gt;While Spark ideally shouldn&amp;rsquo;t be used smaller datasets like this, you could apply the same thought process and transform this code to use for some larger datasets, and there you will see the magic of Spark over Pandas.&lt;/p&gt;
+&lt;p&gt;Inspired heavily from &lt;a class="link" href="https://machinelearningmastery.com/tutorial-to-implement-k-nearest-neighbors-in-python-from-scratch/?ref=localhost" target="_blank" rel="noopener"
+&gt;this&lt;/a&gt; great article.&lt;/p&gt;</description></item></channel></rss>

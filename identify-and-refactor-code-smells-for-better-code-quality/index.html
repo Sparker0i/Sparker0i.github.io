@@ -1,0 +1,534 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Practical Techniques for Spotting Bad Code Patterns and Cleaning Up Your Codebase"><title>How to Identify and Refactor Code Smells for Better Code Quality</title><link rel=canonical href=https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/><link rel=stylesheet href=/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css><meta property='og:title' content="How to Identify and Refactor Code Smells for Better Code Quality"><meta property='og:description' content="Practical Techniques for Spotting Bad Code Patterns and Cleaning Up Your Codebase"><meta property='og:url' content='https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/'><meta property='og:site_name' content="Sparker0i's Blog"><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Code Smells'><meta property='article:tag' content='Refactor'><meta property='article:tag' content='Clean Code'><meta property='article:tag' content='Software Architecture'><meta property='article:published_time' content='2025-05-12T07:43:20+00:00'><meta property='article:modified_time' content='2025-05-12T08:56:26+00:00'><meta property='og:image' content='https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344.png'><meta name=twitter:title content="How to Identify and Refactor Code Smells for Better Code Quality"><meta name=twitter:description content="Practical Techniques for Spotting Bad Code Patterns and Cleaning Up Your Codebase"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://blog.sparker0i.me/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344.png'><link rel="shortcut icon" href=/favicon.png><script async src="https://www.googletagmanager.com/gtag/js?id=G-B20G7JM0X8"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-B20G7JM0X8")}</script></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/sparker0i_hu_693dc16bb266ace6.jpg width=300 height=301 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>😎</span></figure><div class=site-meta><h1 class=site-name><a href=/>Sparker0i's Blog</a></h1><h2 class=site-description>I blog about coding, tech, AI, cricket and other personal hobbies too.</h2></div></header><ol class=menu-social><li><a href=https://github.com/Sparker0i target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/sparker0i target=_blank title=LinkedIn rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 10-4 0"/><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg></a></li><li><a href=https://steamcommunity.com/id/Sparker0i target=_blank title=Steam rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5.0 11-.653 8.953L11.5 16.962V17a3 3 0 01-2.824 3H8.5a3 3 0 01-2.94-2.402L3 16.5V13l3.51 1.755a2.989 2.989.0 012.834-.635l2.727-3.818A4.5 4.5.0 0116.5 5z"/><circle cx="16.5" cy="9.5" r="1" fill="currentColor"/></svg></a></li><li><a href=https://x.com/Sparker0i target=_blank title=Twitter rel=me><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4l11.733 16H20L8.267 4z"/><path d="M4 20l6.768-6.768m2.46-2.46L20 4"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#why-code-smells-matter>Why Code Smells matter?</a></li><li><a href=#basic-code-smells--refactorings><strong>Basic Code Smells & Refactorings</strong></a><ol><li><a href=#long-method>Long Method</a></li><li><a href=#duplicated-code>Duplicated Code</a></li><li><a href=#long-parameter-list>Long Parameter List</a></li><li><a href=#divergent-change>Divergent Change</a></li><li><a href=#feature-envy>Feature Envy</a></li><li><a href=#shotgun-surgery>Shotgun Surgery</a></li><li><a href=#primitive-obsession>Primitive Obsession</a></li><li><a href=#replace-temp-with-query>Replace Temp with Query</a></li><li><a href=#replace-conditional-with-polymorphism>Replace Conditional with Polymorphism</a></li><li><a href=#data-clumps>Data Clumps</a></li></ol></li><li><a href=#general-refactoring-best-practices>General Refactoring Best Practices</a></li><li><a href=#conclusion>Conclusion</a></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/identify-and-refactor-code-smells-for-better-code-quality/><img src=/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344_hu_4e4027fdbd99ebbb.png srcset="/identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344_hu_4e4027fdbd99ebbb.png 800w, /identify-and-refactor-code-smells-for-better-code-quality/6821a6985006bd988f7f9344_hu_2c1a1c60d5cf8275.png 1600w" width=800 height=533 loading=lazy alt="Featured image of post How to Identify and Refactor Code Smells for Better Code Quality"></a></div><div class=article-details><header class=article-category><a href=/categories/clean-code/ style=background-color:#0073c0;color:#fff>Clean Code
+</a><a href=/categories/software-architecture/ style=background-color:#1d00c0;color:#fff>Software Architecture</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/identify-and-refactor-code-smells-for-better-code-quality/>How to Identify and Refactor Code Smells for Better Code Quality</a></h2><h3 class=article-subtitle>Practical Techniques for Spotting Bad Code Patterns and Cleaning Up Your Codebase</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2025-05-12T07:43:20Z>May 12, 2025</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>11 minute read</time></div></footer></div></header><section class=article-content><p>Code is more than just instructions for a machine - it&rsquo;s a form of communication with your future self and teammates. Yet all too often, codebases accumulate hidden &ldquo;stinkers&rdquo; that slow down development, introduce bugs, and frustrate newcomers. These are <strong>code smells</strong>: surface indicators that something deeper in the design or implementation needs attention. In this post, we&rsquo;ll explore a comprehensive catalog of common smells and walk through concrete refactoring - complete with before/after snippets (in Go, but the logic can be applied to any language)- to help you keep your codebase clean, maintainable, and a joy to work with.</p><h2 id=why-code-smells-matter>Why Code Smells matter?</h2><ul><li><strong>Readability & Onboarding</strong>: Long, tangled methods or duplicated logic force readers to mentally untangle intent from implementation. New team members spend hours deciphering what should&rsquo;ve been clear.</li><li><strong>Bug Rate</strong>: Smelly code often has hidden dependencies or unexpected side effects. One small change can ripple out, breaking functionality in multiple places.</li><li><strong>Confidence to Change</strong>: When refactoring feels risky, teams delay improvements, leading to technical debt escalation. Over time, even minor enhancements require heroic effort.</li></ul><blockquote><p><strong>Personal Anecdote</strong>: During the early stages of my career I inherited a 5k line class handling everything from fetching data then transforming it and loading it somewhere. This class was growing exponentially with every sprint/iteration, and soon risked crossing 10k lines. Every change required a full regression suite and lots of manual testing. After identifying just three key smells - Long Method, Feature Envy, and Primitive Obsession - we applied targeted refactorings that reduced that class to under 1000 lines and we were easily able to extend our codebase.</p></blockquote><h2 id=basic-code-smells--refactorings><strong>Basic Code Smells & Refactorings</strong></h2><h3 id=long-method>Long Method</h3><p><strong>What it is:</strong> A method or function that spans many lines - often 200+ - and tries to do too much: input validation, business logic, data transformation, persistence, side-effects, and user interaction all in one place.</p><p><strong>Why it matters</strong></p><ul><li><strong>Cognitive Load</strong>: Readers must keep many moving parts and intents in mind at once.</li><li><strong>Hard to Test</strong>: You can&rsquo;t isolate pieces easily for unit tests.</li><li><strong>Change Risk</strong>: A tweak for one concern can inadvertently break another.</li></ul><p><strong>How to spot it</strong></p><ul><li>Look for methods longer than a screen.</li><li>Multiple comments like // validate, // compute, // persist in one block.</li><li>Deep nesting of conditionals and loops.</li></ul><p><strong>Refactoring</strong>: Use Extract Method</p><ol><li>Identify a coherent chunk: it does one logical sub-task.</li><li>Give it a descriptive name.</li><li>Replace the chunk with a call to the new method.</li></ol><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>Checkout</span><span class=p>(</span><span class=n>cart</span> <span class=n>Cart</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=mf>1.</span> <span class=n>Validate</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>len</span><span class=p>(</span><span class=n>cart</span><span class=o>.</span><span class=n>Items</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span> <span class=p>{</span> <span class=nb>log</span><span class=o>.</span><span class=n>Error</span><span class=p>(</span><span class=s2>&#34;empty cart&#34;</span><span class=p>);</span> <span class=k>return</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=mf>2.</span> <span class=n>Sum</span> <span class=n>prices</span>
+</span></span><span class=line><span class=cl>    <span class=n>sum</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>i</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>cart</span><span class=o>.</span><span class=n>Items</span> <span class=p>{</span> <span class=n>sum</span> <span class=o>+=</span> <span class=n>i</span><span class=o>.</span><span class=n>Price</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>i</span><span class=o>.</span><span class=n>Qty</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=mf>3.</span> <span class=n>Apply</span> <span class=n>discount</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>cart</span><span class=o>.</span><span class=n>Customer</span><span class=o>.</span><span class=n>IsVIP</span> <span class=p>{</span> <span class=n>sum</span> <span class=o>*=</span> <span class=mf>0.9</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=mf>4.</span> <span class=n>Log</span> <span class=o>&amp;</span> <span class=n>persist</span>
+</span></span><span class=line><span class=cl>    <span class=nb>log</span><span class=o>.</span><span class=n>Printf</span><span class=p>(</span><span class=s2>&#34;Total: </span><span class=si>%.2f</span><span class=s2>&#34;</span><span class=p>,</span> <span class=n>sum</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>db</span><span class=o>.</span><span class=n>Save</span><span class=p>(</span><span class=n>cart</span><span class=p>,</span> <span class=n>sum</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=mf>5.</span> <span class=n>Send</span> <span class=n>email</span>
+</span></span><span class=line><span class=cl>    <span class=n>emailService</span><span class=o>.</span><span class=n>Send</span><span class=p>(</span><span class=n>cart</span><span class=o>.</span><span class=n>Customer</span><span class=o>.</span><span class=n>Email</span><span class=p>,</span> <span class=n>sum</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>Checkout</span><span class=p>(</span><span class=n>cart</span> <span class=n>Cart</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>err</span> <span class=p>:</span><span class=o>=</span> <span class=n>validate</span><span class=p>(</span><span class=n>cart</span><span class=p>);</span> <span class=n>err</span> <span class=o>!=</span> <span class=n>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nb>log</span><span class=o>.</span><span class=n>Error</span><span class=p>(</span><span class=n>err</span><span class=p>);</span> <span class=k>return</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span> <span class=p>:</span><span class=o>=</span> <span class=n>calculateTotal</span><span class=p>(</span><span class=n>cart</span><span class=o>.</span><span class=n>Items</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span> <span class=o>=</span> <span class=n>applyDiscount</span><span class=p>(</span><span class=n>total</span><span class=p>,</span> <span class=n>cart</span><span class=o>.</span><span class=n>Customer</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>finalizeOrder</span><span class=p>(</span><span class=n>cart</span><span class=p>,</span> <span class=n>total</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>validate</span><span class=p>(</span><span class=n>cart</span> <span class=n>Cart</span><span class=p>)</span> <span class=n>error</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>len</span><span class=p>(</span><span class=n>cart</span><span class=o>.</span><span class=n>Items</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span> <span class=p>{</span> <span class=k>return</span> <span class=n>fmt</span><span class=o>.</span><span class=n>Errorf</span><span class=p>(</span><span class=s2>&#34;cart empty&#34;</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>calculateTotal</span><span class=p>(</span><span class=n>items</span> <span class=p>[]</span><span class=n>Item</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span> <span class=o>...</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>applyDiscount</span><span class=p>(</span><span class=n>total</span> <span class=n>float64</span><span class=p>,</span> <span class=n>c</span> <span class=n>Customer</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span> <span class=o>...</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>finalizeOrder</span><span class=p>(</span><span class=n>cart</span> <span class=n>Cart</span><span class=p>,</span> <span class=n>total</span> <span class=n>float64</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nb>log</span><span class=o>.</span><span class=n>Printf</span><span class=p>(</span><span class=s2>&#34;Total: </span><span class=si>%.2f</span><span class=s2>&#34;</span><span class=p>,</span> <span class=n>total</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>db</span><span class=o>.</span><span class=n>Save</span><span class=p>(</span><span class=n>cart</span><span class=p>,</span> <span class=n>total</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>emailService</span><span class=o>.</span><span class=n>Send</span><span class=p>(</span><span class=n>cart</span><span class=o>.</span><span class=n>Customer</span><span class=o>.</span><span class=n>Email</span><span class=p>,</span> <span class=n>total</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=duplicated-code>Duplicated Code</h3><p><strong>What it is</strong>: Slivers of nearly identical logic appear in two or more locations - copy-paste programming.</p><p><strong>Why it matters</strong></p><ul><li><strong>Maintenance Hell</strong>: Fixing a bug requires updating every copy.</li><li><strong>Divergence</strong>: Over time, copies drift apart, hiding inconsistent behavior.</li></ul><p><strong>How to spot it</strong></p><ul><li>Search for the same loop, conditional, or calculation in multiple files.</li><li>In code reviews, ask &ldquo;Have we done this before?&rdquo;</li></ul><p><strong>Refactoring Options</strong></p><ul><li>Pull shared logic into a single helper function.</li><li>Replace all occurrences with calls to that helper</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>CalculateTaxA</span><span class=p>(</span><span class=n>order</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>tax</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>item</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>order</span><span class=o>.</span><span class=n>Items</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>tax</span> <span class=o>+=</span> <span class=n>item</span><span class=o>.</span><span class=n>Price</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span> <span class=o>*</span> <span class=mf>0.08</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tax</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>CalculateTaxB</span><span class=p>(</span><span class=n>invoice</span> <span class=n>Invoice</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>tax</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>line</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>invoice</span><span class=o>.</span><span class=n>Lines</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>tax</span> <span class=o>+=</span> <span class=n>line</span><span class=o>.</span><span class=n>UnitPrice</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>line</span><span class=o>.</span><span class=n>Count</span><span class=p>)</span> <span class=o>*</span> <span class=mf>0.08</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tax</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>calculateTax</span><span class=p>(</span><span class=n>subtotal</span> <span class=n>float64</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>subtotal</span> <span class=o>*</span> <span class=mf>0.08</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>CalculateTaxA</span><span class=p>(</span><span class=n>order</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>subtotal</span> <span class=p>:</span><span class=o>=</span> <span class=n>sumPrices</span><span class=p>(</span><span class=n>order</span><span class=o>.</span><span class=n>Items</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>calculateTax</span><span class=p>(</span><span class=n>subtotal</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>CalculateTaxB</span><span class=p>(</span><span class=n>inv</span> <span class=n>Invoice</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>subtotal</span> <span class=p>:</span><span class=o>=</span> <span class=n>sumInvoiceLines</span><span class=p>(</span><span class=n>inv</span><span class=o>.</span><span class=n>Lines</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>calculateTax</span><span class=p>(</span><span class=n>subtotal</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>Shared</span> <span class=n>helpers</span>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>sumPrices</span><span class=p>(</span><span class=n>items</span> <span class=p>[]</span><span class=n>Item</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>i</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>items</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span> <span class=o>+=</span> <span class=n>i</span><span class=o>.</span><span class=n>Price</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>i</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>total</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>sumInvoiceLines</span><span class=p>(</span><span class=n>lines</span> <span class=p>[]</span><span class=n>Line</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>total</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>l</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>lines</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>total</span> <span class=o>+=</span> <span class=n>l</span><span class=o>.</span><span class=n>UnitPrice</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>l</span><span class=o>.</span><span class=n>Count</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>total</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=long-parameter-list>Long Parameter List</h3><p><strong>What it is</strong>: Methods that accept many parameters - often over five - making calls verbose and error-prone.</p><p><strong>Why it matters</strong></p><ul><li>Hard to Remember Order: Callers mix up parameters.</li><li><strong>Low Cohesion</strong>: Signals multiple responsibilities or data clumps.</li></ul><p><strong>How to spot it</strong></p><ul><li>Method signatures with more than 4 arguments.</li><li>Frequent use of null or default values to skip parameters.</li></ul><p><strong>Refactoring</strong>: Introduce Parameter Object</p><ol><li>Identify parameters that form a logical group.</li><li>Create a class/struct to hold them.</li><li>Replace the parameter list with the new object.</li></ol><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>CreateUser</span><span class=p>(</span><span class=n>firstName</span><span class=p>,</span> <span class=n>lastName</span><span class=p>,</span> <span class=n>email</span><span class=p>,</span> <span class=n>phone</span><span class=p>,</span> <span class=n>role</span> <span class=n>string</span><span class=p>,</span> <span class=n>isActive</span> <span class=ne>bool</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=o>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>After:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>CreateUserRequest</span> <span class=n>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>FirstName</span> <span class=n>string</span>
+</span></span><span class=line><span class=cl>    <span class=n>LastName</span>  <span class=n>string</span>
+</span></span><span class=line><span class=cl>    <span class=n>Email</span>     <span class=n>string</span>
+</span></span><span class=line><span class=cl>    <span class=n>Phone</span>     <span class=n>string</span>
+</span></span><span class=line><span class=cl>    <span class=n>Role</span>      <span class=n>string</span>
+</span></span><span class=line><span class=cl>    <span class=n>IsActive</span>  <span class=ne>bool</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>CreateUser</span><span class=p>(</span><span class=n>req</span> <span class=n>CreateUserRequest</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=o>...</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=divergent-change>Divergent Change</h3><p><strong>What it is</strong>: A single class or module is edited for many unrelated reasons&ndash;bug fixes, UI tweaks, business-rule updates&ndash;indicating mixed responsibilities.</p><p><strong>Why it matters</strong></p><ul><li><strong>Fragile</strong>: Changes for one concern can break another.</li><li><strong>Violates SRP</strong>: Violates the Single Responsibility Principle.</li></ul><p><strong>How to spot it</strong></p><ul><li>Version-control history shows one file modified by many tickets of different types.</li><li>Code reviewers comment: &ldquo;Why are we touching this here?&rdquo;</li></ul><p><strong>Refactoring</strong></p><ul><li>Identify distinct responsibilities and extract them into new types.</li><li>Move methods closer to the data they operate on.</li></ul><p>Example: Before - one class handles both user validation and reporting logic:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>UserService</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>s</span> <span class=o>*</span><span class=n>UserService</span><span class=p>)</span> <span class=n>Validate</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=n>error</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>u</span><span class=o>.</span><span class=n>Email</span> <span class=o>==</span> <span class=s2>&#34;&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>fmt</span><span class=o>.</span><span class=n>Errorf</span><span class=p>(</span><span class=s2>&#34;email required&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=o>...</span> <span class=n>many</span> <span class=n>more</span> <span class=n>checks</span> <span class=o>...</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>s</span> <span class=o>*</span><span class=n>UserService</span><span class=p>)</span> <span class=n>GenerateReport</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=n>Report</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=n>mixing</span> <span class=n>data</span> <span class=n>access</span> <span class=ow>and</span> <span class=n>formatting</span><span class=o>...</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Report</span><span class=p>{</span><span class=o>/*</span> <span class=o>...</span> <span class=o>*/</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After - split responsibilities into two classes:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>UserValidator</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>v</span> <span class=o>*</span><span class=n>UserValidator</span><span class=p>)</span> <span class=n>Validate</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=n>error</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>u</span><span class=o>.</span><span class=n>Email</span> <span class=o>==</span> <span class=s2>&#34;&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>fmt</span><span class=o>.</span><span class=n>Errorf</span><span class=p>(</span><span class=s2>&#34;email required&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=o>//</span> <span class=o>...</span> <span class=n>other</span> <span class=n>checks</span> <span class=o>...</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>type</span> <span class=n>UserReportService</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>r</span> <span class=o>*</span><span class=n>UserReportService</span><span class=p>)</span> <span class=n>Generate</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=n>Report</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>report</span> <span class=p>:</span><span class=o>=</span> <span class=n>Report</span><span class=p>{</span><span class=o>/*</span> <span class=o>...</span> <span class=n>focused</span> <span class=n>report</span> <span class=n>generation</span><span class=o>...</span> <span class=o>*/</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>report</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=feature-envy>Feature Envy</h3><p><strong>What it is</strong>: A method in one type heavily accesses fields or methods of another type - more than its own - indicating misplaced behavior.</p><p><strong>Why it matters</strong></p><ul><li><strong>Tight Coupling</strong>: Class A becomes tightly coupled to B&rsquo;s internals.</li><li><strong>Poor Encapsulation</strong>: Behavior isn&rsquo;t located where the data resides.</li></ul><p><strong>How to spot it</strong></p><ul><li>A method&rsquo;s code reads like b.getX(), b.getY(), b.computeZ() repeatedly.</li></ul><p><strong>Refactoring</strong></p><ul><li><strong>Move Method</strong>: Shift the method into Class B.</li><li><strong>Extract Method</strong>: If only part of the code envies B, extract that fragment into a helper on B.</li></ul><p>Example: Before - a method in <code>InvoiceService</code> reaching into <code>Order</code> internals:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>InvoiceService</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>s</span> <span class=o>*</span><span class=n>InvoiceService</span><span class=p>)</span> <span class=n>TotalWithTax</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>sum</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>item</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>o</span><span class=o>.</span><span class=n>Items</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sum</span> <span class=o>+=</span> <span class=n>item</span><span class=o>.</span><span class=n>Price</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=n>rate</span> <span class=p>:</span><span class=o>=</span> <span class=n>o</span><span class=o>.</span><span class=n>Customer</span><span class=o>.</span><span class=n>State</span><span class=o>.</span><span class=n>TaxRate</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>sum</span> <span class=o>*</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>rate</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After - move the logic into <code>Order</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>TotalWithTax</span><span class=p>()</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>sum</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>_</span><span class=p>,</span> <span class=n>item</span> <span class=p>:</span><span class=o>=</span> <span class=nb>range</span> <span class=n>o</span><span class=o>.</span><span class=n>Items</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sum</span> <span class=o>+=</span> <span class=n>item</span><span class=o>.</span><span class=n>Price</span> <span class=o>*</span> <span class=n>float64</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>sum</span> <span class=o>*</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>o</span><span class=o>.</span><span class=n>Customer</span><span class=o>.</span><span class=n>State</span><span class=o>.</span><span class=n>TaxRate</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>type</span> <span class=n>InvoiceService</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>s</span> <span class=o>*</span><span class=n>InvoiceService</span><span class=p>)</span> <span class=n>TotalWithTax</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>o</span><span class=o>.</span><span class=n>TotalWithTax</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=shotgun-surgery>Shotgun Surgery</h3><p><strong>What it is</strong>: A small change requires edits in many different places - scattered across classes or modules.</p><p><strong>Why it matters</strong></p><ul><li><strong>Error-Prone</strong>: Easy to miss one location.</li><li><strong>Discourages Change</strong>: Teams avoid improvements.</li></ul><p><strong>How to spot it</strong>: Search-and-replace touches dozens of files for a single concept.</p><p><strong>Refactoring</strong></p><ul><li><strong>Introduce Facade</strong>: Centralize calls behind one interface.</li><li><strong>Move Related Behavior</strong>: Co-locate methods and data so that a change is</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>OnboardUser</span><span class=p>(</span><span class=n>userID</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>data</span> <span class=p>:</span><span class=o>=</span> <span class=n>db</span><span class=o>.</span><span class=n>FetchUserData</span><span class=p>(</span><span class=n>userID</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>processed</span> <span class=p>:</span><span class=o>=</span> <span class=n>processor</span><span class=o>.</span><span class=n>Process</span><span class=p>(</span><span class=n>data</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>notifier</span><span class=o>.</span><span class=n>SendWelcome</span><span class=p>(</span><span class=n>userID</span><span class=p>,</span> <span class=n>processed</span><span class=o>.</span><span class=n>Summary</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>OnboardingFacade</span> <span class=n>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>DB</span>        <span class=n>Database</span>
+</span></span><span class=line><span class=cl>    <span class=n>Processor</span> <span class=n>Processor</span>
+</span></span><span class=line><span class=cl>    <span class=n>Notifier</span>  <span class=n>Notifier</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>f</span> <span class=o>*</span><span class=n>OnboardingFacade</span><span class=p>)</span> <span class=n>Onboard</span><span class=p>(</span><span class=n>userID</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>data</span> <span class=p>:</span><span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>DB</span><span class=o>.</span><span class=n>FetchUserData</span><span class=p>(</span><span class=n>userID</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>summary</span> <span class=p>:</span><span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>Processor</span><span class=o>.</span><span class=n>Process</span><span class=p>(</span><span class=n>data</span><span class=p>)</span><span class=o>.</span><span class=n>Summary</span>
+</span></span><span class=line><span class=cl>    <span class=n>f</span><span class=o>.</span><span class=n>Notifier</span><span class=o>.</span><span class=n>SendWelcome</span><span class=p>(</span><span class=n>userID</span><span class=p>,</span> <span class=n>summary</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>Client</span><span class=p>:</span>
+</span></span><span class=line><span class=cl><span class=n>facade</span> <span class=p>:</span><span class=o>=</span> <span class=n>OnboardingFacade</span><span class=p>{</span><span class=n>db</span><span class=p>,</span> <span class=n>processor</span><span class=p>,</span> <span class=n>notifier</span><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=n>facade</span><span class=o>.</span><span class=n>Onboard</span><span class=p>(</span><span class=s2>&#34;user123&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=primitive-obsession>Primitive Obsession</h3><p><strong>What it is</strong>: Overusing built-in types (String, int, bool) for domain concepts instead of small dedicated classes or value objects.</p><p><strong>Why it matters</strong></p><ul><li><strong>Scattering of Validation</strong>: Every user-input string is validated in ad-hoc ways.</li><li><strong>Duplication</strong>: Parsing and formatting logic repeated.</li></ul><p><strong>How to spot it</strong></p><ul><li>Method signatures full of String parameters representing distinct concepts (e.g., email, phone, address).</li></ul><p><strong>Refactoring</strong></p><ul><li>Replace Primitive with Value Object: Create classes like <code>EmailAddress</code>, <code>PhoneNumber</code> that encapsulate format checks and domain logic.</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>ConvertAmount</span><span class=p>(</span><span class=n>amount</span> <span class=n>float64</span><span class=p>,</span> <span class=n>fromCurrency</span><span class=p>,</span> <span class=n>toCurrency</span> <span class=n>string</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>rate</span> <span class=p>:</span><span class=o>=</span> <span class=n>lookupRate</span><span class=p>(</span><span class=n>fromCurrency</span><span class=p>,</span> <span class=n>toCurrency</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>amount</span> <span class=o>*</span> <span class=n>rate</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>Currency</span> <span class=n>string</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>c</span> <span class=n>Currency</span><span class=p>)</span> <span class=n>RateTo</span><span class=p>(</span><span class=n>other</span> <span class=n>Currency</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>lookupRate</span><span class=p>(</span><span class=n>string</span><span class=p>(</span><span class=n>c</span><span class=p>),</span> <span class=n>string</span><span class=p>(</span><span class=n>other</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>ConvertAmount</span><span class=p>(</span><span class=n>amount</span> <span class=n>float64</span><span class=p>,</span> <span class=n>from</span><span class=p>,</span> <span class=n>to</span> <span class=n>Currency</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>amount</span> <span class=o>*</span> <span class=n>from</span><span class=o>.</span><span class=n>RateTo</span><span class=p>(</span><span class=n>to</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=replace-temp-with-query>Replace Temp with Query</h3><p><strong>What it is</strong>: Temporary variables hold intermediate calculation results, cluttering the method body.</p><p><strong>Why it matters</strong></p><ul><li><strong>Readability</strong>: Readers must track variables and their transformations.</li><li><strong>Duplication</strong>: The same calculation might reappear elsewhere.</li></ul><p><strong>How to spot it</strong></p><ul><li>Sequences like temp = expr; &mldr; use temp; &mldr; modify temp.</li></ul><p><strong>Refactoring</strong></p><ul><li>Encapsulate the expression in a well-named query method, then call it directly.</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>FinalPrice</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>basePrice</span> <span class=p>:</span><span class=o>=</span> <span class=n>float64</span><span class=p>(</span><span class=n>o</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span> <span class=o>*</span> <span class=n>o</span><span class=o>.</span><span class=n>UnitPrice</span>
+</span></span><span class=line><span class=cl>    <span class=n>discount</span> <span class=p>:</span><span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>basePrice</span> <span class=o>&gt;</span> <span class=mi>1000</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>discount</span> <span class=o>=</span> <span class=n>basePrice</span> <span class=o>*</span> <span class=mf>0.05</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>basePrice</span> <span class=o>-</span> <span class=n>discount</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>FinalPrice</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>calculateBase</span><span class=p>(</span><span class=n>o</span><span class=p>)</span> <span class=o>-</span> <span class=n>calculateDiscount</span><span class=p>(</span><span class=n>o</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>calculateBase</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>float64</span><span class=p>(</span><span class=n>o</span><span class=o>.</span><span class=n>Quantity</span><span class=p>)</span> <span class=o>*</span> <span class=n>o</span><span class=o>.</span><span class=n>UnitPrice</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>calculateDiscount</span><span class=p>(</span><span class=n>o</span> <span class=n>Order</span><span class=p>)</span> <span class=n>float64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>base</span> <span class=p>:</span><span class=o>=</span> <span class=n>calculateBase</span><span class=p>(</span><span class=n>o</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>base</span> <span class=o>&gt;</span> <span class=mi>1000</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>base</span> <span class=o>*</span> <span class=mf>0.05</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=replace-conditional-with-polymorphism>Replace Conditional with Polymorphism</h3><p><strong>What it is</strong>: Extensive <code>if-else</code> or <code>switch</code> blocks that dispatch based on type codes or flags.</p><p><strong>Why it matters</strong></p><ul><li><strong>Open/Closed Violation</strong>: Every time you add a new type, you modify the conditional.</li><li><strong>Readability</strong>: Logic spread across a tangled conditional.</li></ul><p><strong>How to spot it</strong></p><ul><li>Large switch(order.type) { case A:&mldr;; case B:&mldr; } constructs.</li></ul><p><strong>Refactoring</strong></p><ul><li>Strategy Pattern or Class Hierarchy: Define a common interface and let each subtype implement its behavior.</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>SendNotification</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>,</span> <span class=n>method</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>method</span> <span class=o>==</span> <span class=s2>&#34;email&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sendEmail</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>Email</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=n>method</span> <span class=o>==</span> <span class=s2>&#34;sms&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sendSMS</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>Phone</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=n>method</span> <span class=o>==</span> <span class=s2>&#34;push&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>sendPush</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>DeviceToken</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>Notifier</span> <span class=n>interface</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>Notify</span><span class=p>(</span><span class=n>User</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>type</span> <span class=n>EmailNotifier</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>EmailNotifier</span><span class=p>)</span> <span class=n>Notify</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=p>{</span> <span class=n>sendEmail</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>Email</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>type</span> <span class=n>SMSNotifier</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>SMSNotifier</span><span class=p>)</span> <span class=n>Notify</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=p>{</span> <span class=n>sendSMS</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>Phone</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>type</span> <span class=n>PushNotifier</span> <span class=n>struct</span><span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=p>(</span><span class=n>PushNotifier</span><span class=p>)</span> <span class=n>Notify</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>)</span> <span class=p>{</span> <span class=n>sendPush</span><span class=p>(</span><span class=n>u</span><span class=o>.</span><span class=n>DeviceToken</span><span class=p>,</span> <span class=s2>&#34;Hello!&#34;</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>var</span> <span class=n>notifierMap</span> <span class=o>=</span> <span class=n>map</span><span class=p>[</span><span class=n>string</span><span class=p>]</span><span class=n>Notifier</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;email&#34;</span><span class=p>:</span> <span class=n>EmailNotifier</span><span class=p>{},</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sms&#34;</span><span class=p>:</span>   <span class=n>SMSNotifier</span><span class=p>{},</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;push&#34;</span><span class=p>:</span>  <span class=n>PushNotifier</span><span class=p>{},</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>SendNotification</span><span class=p>(</span><span class=n>u</span> <span class=n>User</span><span class=p>,</span> <span class=n>method</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>n</span><span class=p>,</span> <span class=n>ok</span> <span class=p>:</span><span class=o>=</span> <span class=n>notifierMap</span><span class=p>[</span><span class=n>method</span><span class=p>];</span> <span class=n>ok</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>n</span><span class=o>.</span><span class=n>Notify</span><span class=p>(</span><span class=n>u</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=data-clumps>Data Clumps</h3><p><strong>What it is</strong>: Groups of variables that always appear together&ndash;e.g., x, y, z coordinates, street, city, zip.</p><p><strong>Why it matters</strong></p><ul><li><strong>Duplication</strong>: Same parameter list repeated.</li><li><strong>Cohesion</strong>: Related data isn&rsquo;t grouped.</li></ul><p><strong>How to spot it</strong></p><ul><li>Method after method accepting the same set of parameters.</li></ul><p><strong>Refactoring</strong></p><ul><li>Introduce Parameter Object or Data Class to bundle related fields into one type.</li></ul><p>Example: Before</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>func</span> <span class=n>DrawLine</span><span class=p>(</span><span class=n>x1</span><span class=p>,</span> <span class=n>y1</span><span class=p>,</span> <span class=n>x2</span><span class=p>,</span> <span class=n>y2</span> <span class=n>float64</span><span class=p>,</span> <span class=n>color</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>SetStrokeColor</span><span class=p>(</span><span class=n>color</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>MoveTo</span><span class=p>(</span><span class=n>x1</span><span class=p>,</span> <span class=n>y1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>LineTo</span><span class=p>(</span><span class=n>x2</span><span class=p>,</span> <span class=n>y2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>Stroke</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>Example: After</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>type</span> <span class=n>Point</span> <span class=n>struct</span><span class=p>{</span> <span class=n>X</span><span class=p>,</span> <span class=n>Y</span> <span class=n>float64</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>func</span> <span class=n>DrawLine</span><span class=p>(</span><span class=n>p1</span><span class=p>,</span> <span class=n>p2</span> <span class=n>Point</span><span class=p>,</span> <span class=n>color</span> <span class=n>string</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>SetStrokeColor</span><span class=p>(</span><span class=n>color</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>MoveTo</span><span class=p>(</span><span class=n>p1</span><span class=o>.</span><span class=n>X</span><span class=p>,</span> <span class=n>p1</span><span class=o>.</span><span class=n>Y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>LineTo</span><span class=p>(</span><span class=n>p2</span><span class=o>.</span><span class=n>X</span><span class=p>,</span> <span class=n>p2</span><span class=o>.</span><span class=n>Y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>ctx</span><span class=o>.</span><span class=n>Stroke</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>Usage</span>
+</span></span><span class=line><span class=cl><span class=n>DrawLine</span><span class=p>(</span><span class=n>Point</span><span class=p>{</span><span class=mi>10</span><span class=p>,</span> <span class=mi>20</span><span class=p>},</span> <span class=n>Point</span><span class=p>{</span><span class=mi>30</span><span class=p>,</span> <span class=mi>40</span><span class=p>},</span> <span class=s2>&#34;red&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=general-refactoring-best-practices>General Refactoring Best Practices</h2><ol><li><strong>Test Coverage First</strong>: Ensure you have reliable unit and integration tests before refactoring.</li><li><strong>Tiny, Safe Steps</strong>: Change one thing at a time; run tests after each change to catch regressions early.</li><li><strong>IDE Assistance</strong>: Leverage built-in refactorings - Extract Method, Rename, Inline - to minimize manual edits.</li><li><strong>Code Reviews with Smell Checks</strong>: Add &ldquo;smell spotting&rdquo; to your review checklist to catch issues collaboratively.</li><li><strong>Continuous Refactoring</strong>: Make cleanup part of your regular workflow and Definition of Done, not a separate &ldquo;cleanup sprint.&rdquo;</li></ol><h2 id=conclusion>Conclusion</h2><p>Code smells are inevitable, but they need not become insurmountable technical debt. By recognizing these ten patterns and applying targeted refactorings, you&rsquo;ll cultivate a codebase that&rsquo;s more understandable, safer to change, and more enjoyable for your entire team. Start small, build momentum with quick wins like Extract Method, then tackle more advanced refactorings. Your future self (and teammates) will thank you.</p></section><footer class=article-footer><section class=article-tags><a href=/tags/code-smells/>Code Smells</a>
+<a href=/tags/refactor/>Refactor</a>
+<a href=/tags/clean-code/>Clean Code</a>
+<a href=/tags/software-architecture/>Software Architecture</a></section><section class=article-lastmod><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>Last updated on May 12, 2025 08:56 UTC</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/refactor-a-tightly-coupled-codebase-by-following-solid-principles/><div class=article-image><img src=/refactor-a-tightly-coupled-codebase-by-following-solid-principles/66b29d4c63629cc69724f054.c3ee0fa73e76b6693234f5df9f8ca83c_hu_bb2569b1ec36a0b5.png width=250 height=150 loading=lazy alt="Featured image of post Refactor a tightly coupled codebase by following SOLID Principles" data-key=refactor-a-tightly-coupled-codebase-by-following-solid-principles data-hash="md5-w+4Ppz52tmkyNPXfn4yoPA=="></div><div class=article-details><h2 class=article-title>Refactor a tightly coupled codebase by following SOLID Principles</h2></div></a></article><article class=has-image><a href=/self-contained-systems-alternate-to-monolith-microservices/><div class=article-image><img src=/self-contained-systems-alternate-to-monolith-microservices/scs.f906efea215a2f8da82e9185dd5c7381_hu_762f9bce6b333f52.jpg width=250 height=150 loading=lazy alt="Featured image of post Self Contained Systems: Beyond the Monolith vs Microservices debate" data-key=self-contained-systems-alternate-to-monolith-microservices data-hash="md5-+Qbv6iFaL42oLpGF3VxzgQ=="></div><div class=article-details><h2 class=article-title>Self Contained Systems: Beyond the Monolith vs Microservices debate</h2></div></a></article><article class=has-image><a href=/why-every-developer-should-care-about-design-patterns/><div class=article-image><img src=/why-every-developer-should-care-about-design-patterns/67cbf99efca581965cde6fca.4fa4ac1d9252fdd6668e283c5b9b12f0_hu_88b5b38ff3f0d92e.png width=250 height=150 loading=lazy alt="Featured image of post Why Every Developer Should Care About Design Patterns: A Deep Dive" data-key=why-every-developer-should-care-about-design-patterns data-hash="md5-T6SsHZJS/dZmjig8W5sS8A=="></div><div class=article-details><h2 class=article-title>Why Every Developer Should Care About Design Patterns: A Deep Dive</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=Sparker0i/Sparker0i.github.io data-repo-id=R_kgDOPDIt_w data-category=Announcements data-category-id=DIC_kwDOPDIt_84CsLyO data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=1 data-input-position=top data-theme=preferred_color_scheme data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"preferred_color_scheme":"preferred_color_scheme")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2017 -
+2026 Sparker0i's Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.34.1>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

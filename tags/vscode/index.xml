@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>VSCode on Sparker0i's Blog</title><link>https://blog.sparker0i.me/tags/vscode/</link><description>Recent content in VSCode on Sparker0i's Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 19 Jul 2025 17:04:00 +0000</lastBuildDate><atom:link href="https://blog.sparker0i.me/tags/vscode/index.xml" rel="self" type="application/rss+xml"/><item><title>I tried the iPad as a development machine. Here's how that went</title><link>https://blog.sparker0i.me/tried-ipad-as-development-machine/</link><pubDate>Sat, 19 Jul 2025 17:04:00 +0000</pubDate><guid>https://blog.sparker0i.me/tried-ipad-as-development-machine/</guid><description>&lt;img src="https://blog.sparker0i.me/tried-ipad-as-development-machine/ipad-header.jpeg" alt="Featured image of post I tried the iPad as a development machine. Here's how that went" /&gt;&lt;p&gt;Earlier this year, my gaming laptop started to show its signs of aging. Games constantly froze, laptop kept getting hotter on idle use and graphics and animations were slower than ever before. Thus I had decided to build a gaming PC for myself.&lt;/p&gt;
+&lt;p&gt;But I still needed a laptop for when I&amp;rsquo;d be traveling. Most of the latest laptops available in the Indian market were that of Intel. Given the spate of issues that have hit Intel chips in the last few years, I did not want to go for them. The ones having the AMD chip were all gaming laptops and were too expensive. Snapdragon X based laptops are not quite ready yet for the full development lifecycle.&lt;/p&gt;
+&lt;p&gt;I then realized I could do all of my development online. Which then drove me to the iPad. The iPad Air with the M3 chip and 256GB storage was available at Rs. 80k and was far cheaper than the other laptops I&amp;rsquo;d been looking at. The iPad combined with a Magic Keyboard was all that I needed to properly code on the go.&lt;/p&gt;
+&lt;h2 id="my-coding-combination"&gt;My Coding Combination
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;GitHub Codespaces&lt;/strong&gt; became my primary development environment. The biggest gotcha? iPadOS keyboard shortcuts. They&amp;rsquo;re locked down tighter than a production database, so the usual Cmd+T for new tabs simply opens a new Safari tab instead of a terminal tab in VS Code.&lt;/p&gt;
+&lt;p&gt;My workaround: Open the codespace, then &amp;ldquo;Add to Home Screen&amp;rdquo; via Safari&amp;rsquo;s share menu. This creates a pseudo-native PWA app that bypasses some shortcut restrictions. You can finally remap Option-based shortcuts to something sensible like Option+W for closing tabs and Option+Tab for switching between them.&lt;/p&gt;
+&lt;p&gt;The muscle memory adjustment took about two weeks, but now I&amp;rsquo;m flying through code again.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Beyond the basic setup&lt;/strong&gt;, I&amp;rsquo;m running a 2-core, 8GB RAM codespace instance that costs roughly $0.36/hour. For most days, the free 120 hours covers everything, but intense project weeks can push me into paid territory.&lt;/p&gt;
+&lt;h2 id="what-nobody-tells-you-about-ipad-development"&gt;What Nobody Tells You About iPad Development
+&lt;/h2&gt;&lt;h3 id="the-good-stuff-that-surprised-me"&gt;The good stuff that surprised me
+&lt;/h3&gt;&lt;p&gt;The M3 chip is genuinely overkill for development work. I can have 20+ Safari tabs open, multiple codespace instances, Slack, Figma, and a Zoom call running simultaneously without any thermal throttling. My old Intel laptop would have sounded like a jet engine by now.&lt;/p&gt;
+&lt;p&gt;Battery life is incredible. I coded for 6 hours straight during a recent flight to north India, watched a web series episode, and still had 20% charge left. Try that with any x86 laptop under Rs. 1.5 lakhs.&lt;/p&gt;
+&lt;h3 id="the-painful-realities"&gt;The painful realities
+&lt;/h3&gt;&lt;p&gt;Internet dependency is brutal. During a power outage that killed my Wi-Fi for 3 hours, the iPad became an expensive paperweight. No local Node.js, no Git, no nothing. Laptops with local dev environments would have kept me productive. I then had to rely on the hotspot from my iPhone, but that ended up draining the battery of both the devices.&lt;/p&gt;
+&lt;p&gt;File management feels terrible. Want to drag a CSV from Files into your web app for testing? Prepare for a 5-step dance involving the share sheet, temporary storage, and prayer. The Files app is a beautiful lie that promises desktop-like file handling but delivers mobile-first friction. However things might change with the upcoming iPadOS 26 release.&lt;/p&gt;
+&lt;h3 id="real-performance-testing"&gt;Real Performance Testing
+&lt;/h3&gt;&lt;p&gt;I stress-tested this setup during a weekend trying to do multiple things:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Migrate this blog from Hashnode to Hugo&lt;/li&gt;
+&lt;li&gt;Learn about LLMs by building an app&lt;/li&gt;
+&lt;li&gt;Build a webserver in Go from scratch&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All of the above were on three different codespaces on GitHub. Here&amp;rsquo;s what came out of that weekend:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Day 1: Smooth sailing. Hot reloading worked perfectly on Hugo, additional go module installs were fast thanks to codespace&amp;rsquo;s fiber connection, and the iPad stayed cool despite 12 hours of continuous use.&lt;/li&gt;
+&lt;li&gt;Day 2: Discovered the multi-tasking limitations. Switching between the codespaces, go documentation, and Discord required constant app switching. Unlike Windows or Mac, the switching between app animations takes ~2 seconds to complete. This definitely frustrated me.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="cost-reality-check"&gt;Cost Reality Check
+&lt;/h2&gt;&lt;p&gt;My iPad Air M3 (256GB) set me back ₹80,000 and the Magic Keyboard cost another ₹27,000, totalling ₹1,07,000. Compare this to a MacBook Air M3 at ₹1,15,000 or a decent Windows laptop at ₹80,000-1,20,000. Unfortunately the iPad falls flat in front of the MacBook Air thanks to its positioning in premium pricing territory while delivering close to no benefits over the MacBook.&lt;/p&gt;
+&lt;h2 id="when-ipad-development-actually-makes-sense"&gt;When iPad Development Actually Makes Sense
+&lt;/h2&gt;&lt;p&gt;You&amp;rsquo;re a good candidate if you satisfy some of these below points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Your codebase lives in GitHub with proper CI/CD setup through GitHub Actions&lt;/li&gt;
+&lt;li&gt;You primarily work with web technologies (React, Vue, Node.js, Python web apps)&lt;/li&gt;
+&lt;li&gt;You have reliable high-speed internet everywhere you code&lt;/li&gt;
+&lt;li&gt;You value portability over raw performance&lt;/li&gt;
+&lt;li&gt;You&amp;rsquo;re comfortable with cloud-first workflows&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If that doesn&amp;rsquo;t sound like you, then you should stick to a laptop if:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You do native iOS/Android development (yes, the irony)&lt;/li&gt;
+&lt;li&gt;Your workflow involves Docker, VMs, or local databases&lt;/li&gt;
+&lt;li&gt;You frequently work offline or with spotty internet&lt;/li&gt;
+&lt;li&gt;You need multiple monitors for productivity&lt;/li&gt;
+&lt;li&gt;You rely heavily on platform-specific tools&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="three-months-later-the-honest-verdict"&gt;Three months later: The honest verdict
+&lt;/h2&gt;&lt;p&gt;This experiment succeeded, but with important caveats. The iPad handles 80% of my development tasks beautifully. The remaining 20% – complex debugging, performance profiling, multi-service local development – still sends me back to my desktop.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What I miss most&lt;/strong&gt;: Terminal muscle memory. Web-based terminals are good, but they&amp;rsquo;re not &lt;em&gt;native&lt;/em&gt;. Keyboard shortcuts feel slightly off, copy-paste behavior is inconsistent, and there&amp;rsquo;s always a tiny input lag that breaks flow state.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What I appreciate most&lt;/strong&gt;: Zero thermal throttling, all-day battery, and the ability to code comfortably in coffee shops without looking like I&amp;rsquo;m running a crypto mining operation.&lt;/p&gt;
+&lt;p&gt;The iPad won&amp;rsquo;t replace serious development machines yet, but it&amp;rsquo;s redefined what &amp;ldquo;portable coding&amp;rdquo; means for me. When Apple inevitably allows proper terminal emulators and fixes the multitasking limitations, this setup will become genuinely compelling for a broader range of developers.&lt;/p&gt;
+&lt;h2 id="the-bottom-line"&gt;The Bottom Line
+&lt;/h2&gt;&lt;p&gt;If you&amp;rsquo;re expecting a laptop replacement, you&amp;rsquo;ll be disappointed. If you&amp;rsquo;re looking for a capable secondary development device that happens to be the best tablet on the market, the iPad delivers.&lt;/p&gt;
+&lt;p&gt;The future of development is increasingly cloud-native, and the iPad offers a glimpse into that future today. It&amp;rsquo;s not perfect, but it&amp;rsquo;s far more capable than I expected when I started this experiment.&lt;/p&gt;
+&lt;p&gt;Would I buy it again? Absolutely. But I&amp;rsquo;d also keep a proper development machine for the heavy lifting.&lt;/p&gt;</description></item></channel></rss>
