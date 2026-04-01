@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Read(//var/home/sparker0i/**)",
+      "Bash(pnpm build:*)",
+      "Bash(grep -n \"ReadingProgress\" /home/sparker0i/portfolio/app/blog/[slug]/page.tsx /home/sparker0i/portfolio/components/ReadingProgress.tsx)",
+      "Bash(grep -n \"BackLink\" /home/sparker0i/portfolio/app/blog/[slug]/page.tsx)",
+      "Bash(grep -E \"\\\\.\\(json|ts|js|tsx\\)$\")",
+      "Bash(grep -n \"image\\\\|og\\\\|openGraph\" /var/home/sparker0i/portfolio/app/blog/[slug]/page.tsx -i)"
+    ]
+  }
+}
