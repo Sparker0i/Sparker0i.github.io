@@ -130,7 +130,7 @@ body {
 /* Shiki pre */
 pre.shiki {
   background: var(--color-surface-elevated) !important;
-  border-radius: 6px;
+  border-radius: 0;
   padding: 1.25rem 1.5rem !important;
   overflow-x: auto;
   margin: 0;
@@ -160,24 +160,34 @@ pre.shiki .highlighted {
   display: block;
 }
 
-.code-block-wrapper {
+.code-area {
+  margin: 1.75rem 0;
   border: 1px solid var(--color-border);
   border-radius: 6px;
   overflow: hidden;
-  margin: 1.75rem 0;
 }
 
-.code-area {
-  position: relative;
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0d0f0e;
+  border-bottom: 1px solid var(--color-border);
+  padding: 7px 14px;
+}
+
+.code-lang {
+  color: #6b7568;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 
 
 
 .code-copy-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
   color: #6b7568;
   font-size: 11px;
   font-family: var(--font-mono);
@@ -186,14 +196,8 @@ pre.shiki .highlighted {
   padding: 2px 8px;
   border: 1px solid transparent;
   border-radius: 2px;
-  background: var(--color-surface-elevated);
+  background: transparent;
   transition: color 0.15s, border-color 0.15s;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.code-area:hover .code-copy-btn {
-  opacity: 1;
 }
 
 .code-copy-btn:hover {
@@ -204,7 +208,6 @@ pre.shiki .highlighted {
 .code-copy-btn.copied {
   color: #4ade80;
   border-color: rgba(74, 222, 128, 0.35);
-  opacity: 1;
 }
 
 /* ─── Inline code ────────────────────────────────────────── */

@@ -3,6 +3,7 @@ import path from 'path'
 import matter from 'gray-matter'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
+import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype'
@@ -181,11 +182,22 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
 
   const result = await unified()
     .use(remarkParse)
+    .use(remarkGfm)
     .use(remarkCodeMeta)
     .use(makeRemarkExtractHeadings(toc))
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeAddHeadingIds)
-    .use(rehypeShiki, { theme: 'github-dark-dimmed', transformers: [transformerNotationHighlight()] } satisfies RehypeShikiOptions)
+    .use(rehypeShiki, {
+      theme: 'github-dark-dimmed',
+      transformers: [
+        transformerNotationHighlight(),
+        {
+          pre(node) {
+            node.properties['data-language'] = this.options.lang
+          },
+        },
+      ],
+    } satisfies RehypeShikiOptions)
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(content)
 

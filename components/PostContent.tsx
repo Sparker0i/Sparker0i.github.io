@@ -18,15 +18,12 @@ export function PostContent({ html }: PostContentProps) {
 
     pres.forEach((pre) => {
       // Avoid double-wrapping on HMR / StrictMode re-runs
-      if (pre.parentElement?.classList.contains('code-block-wrapper')) return
+      if (pre.parentElement?.classList.contains('code-area')) return
 
       const code = pre.querySelector('code')
+      const lang = pre.getAttribute('data-language') ?? ''
 
-      // Wrapper
-      const wrapper = document.createElement('div')
-      wrapper.className = 'code-block-wrapper'
-
-      // Copy button (built first so we can wire it regardless of group)
+      // Copy button
       const copyBtn = document.createElement('button')
       copyBtn.className = 'code-copy-btn'
       copyBtn.textContent = 'copy'
@@ -43,15 +40,23 @@ export function PostContent({ html }: PostContentProps) {
         })
       })
 
-      // Code area: relative container so copy btn can be positioned inside it
+      // Header bar
+      const header = document.createElement('div')
+      header.className = 'code-block-header'
+
+      const langEl = document.createElement('span')
+      langEl.className = 'code-lang'
+      langEl.textContent = lang
+      header.appendChild(langEl)
+      header.appendChild(copyBtn)
+
+      // Wrapper
       const codeArea = document.createElement('div')
       codeArea.className = 'code-area'
 
-      // Inject into DOM
-      pre.parentNode?.insertBefore(wrapper, pre)
+      pre.parentNode?.insertBefore(codeArea, pre)
+      codeArea.appendChild(header)
       codeArea.appendChild(pre)
-      codeArea.appendChild(copyBtn)
-      wrapper.appendChild(codeArea)
     })
   }, [html])
 
