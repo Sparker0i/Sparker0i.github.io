@@ -80,7 +80,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-5 flex flex-wrap items-center gap-4 font-mono text-xs text-text-muted">
             <DateDisplay dateStr={post.date} />
             <span>·</span>
-            <span>{post.readingTime} min read</span>
+            <span>{post.readingTime} min read · ~{post.wordCount.toLocaleString()} words</span>
             {post.lastmod && post.lastmod !== post.date && (
               <>
                 <span>·</span>

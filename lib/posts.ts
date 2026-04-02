@@ -18,6 +18,7 @@ export interface Post {
   tags: string[]
   excerpt: string
   readingTime: number
+  wordCount: number
   draft: boolean
   image?: string
 }
@@ -118,6 +119,10 @@ function calculateReadingTime(content: string): number {
   return Math.ceil(wordCount / 200)
 }
 
+function countWords(content: string): number {
+  return content.split(/\s+/).filter(Boolean).length
+}
+
 /**
  * Remark plugin: attaches data-lang and data-filename to code nodes
  * so they survive as attributes on <code> elements in the HTML output.
@@ -192,6 +197,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
     tags: data.tags ?? [],
     excerpt: data.excerpt ?? '',
     readingTime: calculateReadingTime(content),
+    wordCount: countWords(content),
     draft: data.draft ?? false,
     image: data.image ?? undefined,
     htmlContent: String(result),
@@ -230,6 +236,7 @@ export function getAllPosts(): Post[] {
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? '',
       readingTime: calculateReadingTime(content),
+      wordCount: countWords(content),
       draft: data.draft ?? false,
       image: data.image ?? undefined,
     } satisfies Post
