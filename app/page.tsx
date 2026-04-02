@@ -256,28 +256,16 @@ export default function Home() {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col gap-1 py-5 first:pt-0 last:pb-0 hover:opacity-80 transition-opacity"
+                  className="group flex flex-col gap-1.5 py-5 first:pt-0 last:pb-0 hover:opacity-80 transition-opacity"
                 >
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-display text-base font-bold text-text-bright group-hover:text-accent transition-colors">
-                      {post.title}
-                    </span>
-                    <span className="shrink-0 font-mono text-xs text-text-muted">
-                      {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
-                  {post.excerpt && (
-                    <p className="font-body text-sm leading-relaxed text-text-muted line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  {post.tags.length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-1.5">
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="tag tag-muted">{tag}</span>
-                      ))}
-                    </div>
-                  )}
+                  <span className="font-mono text-xs text-text-muted">
+                    {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {' · '}
+                    {post.readingTime} min read
+                  </span>
+                  <span className="font-display text-base font-bold text-text-bright group-hover:text-accent transition-colors">
+                    {post.title}
+                  </span>
                 </Link>
               ))}
             </div>
