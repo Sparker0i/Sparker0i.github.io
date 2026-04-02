@@ -5,7 +5,8 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
-import rehypeShiki from '@shikijs/rehype'
+import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype'
+import { transformerNotationHighlight } from '@shikijs/transformers'
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog')
 
@@ -13,6 +14,7 @@ export interface Post {
   slug: string
   title: string
   date: string
+  lastmod?: string
   tags: string[]
   excerpt: string
   readingTime: number
@@ -178,7 +180,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
     .use(makeRemarkExtractHeadings(toc))
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeAddHeadingIds)
-    .use(rehypeShiki, { theme: 'github-dark-dimmed' })
+    .use(rehypeShiki, { theme: 'github-dark-dimmed', transformers: [transformerNotationHighlight()] } satisfies RehypeShikiOptions)
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(content)
 
@@ -186,6 +188,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
     slug,
     title: data.title ?? '',
     date: data.date ?? '',
+    lastmod: data.lastmod ?? undefined,
     tags: data.tags ?? [],
     excerpt: data.excerpt ?? '',
     readingTime: calculateReadingTime(content),
@@ -223,6 +226,7 @@ export function getAllPosts(): Post[] {
       slug,
       title: data.title ?? '',
       date: data.date ?? '',
+      lastmod: data.lastmod ?? undefined,
       tags: data.tags ?? [],
       excerpt: data.excerpt ?? '',
       readingTime: calculateReadingTime(content),

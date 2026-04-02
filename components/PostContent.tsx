@@ -21,8 +21,6 @@ export function PostContent({ html }: PostContentProps) {
       if (pre.parentElement?.classList.contains('code-block-wrapper')) return
 
       const code = pre.querySelector('code')
-      const lang = code?.getAttribute('data-lang') ?? ''
-      const filename = code?.getAttribute('data-filename') ?? ''
 
       // Wrapper
       const wrapper = document.createElement('div')
@@ -45,50 +43,15 @@ export function PostContent({ html }: PostContentProps) {
         })
       })
 
-      // Header bar
-      const header = document.createElement('div')
-      header.className = 'code-block-header'
-
-      // Left group: macOS dots + lang label
-      const leftGroup = document.createElement('div')
-      leftGroup.className = 'code-header-left'
-
-      const dots = document.createElement('div')
-      dots.className = 'mac-dots'
-      ;['red', 'yellow', 'green'].forEach((colour) => {
-        const dot = document.createElement('span')
-        dot.className = `mac-dot mac-dot-${colour}`
-        dots.appendChild(dot)
-      })
-      leftGroup.appendChild(dots)
-
-      if (lang) {
-        const langEl = document.createElement('span')
-        langEl.className = 'code-lang'
-        langEl.textContent = lang
-        leftGroup.appendChild(langEl)
-      }
-
-      // Right group: filename (amber) + copy button
-      const rightGroup = document.createElement('div')
-      rightGroup.className = 'code-header-right'
-
-      if (filename) {
-        const fn = document.createElement('span')
-        fn.className = 'code-filename'
-        fn.textContent = filename
-        rightGroup.appendChild(fn)
-      }
-
-      rightGroup.appendChild(copyBtn)
-
-      header.appendChild(leftGroup)
-      header.appendChild(rightGroup)
+      // Code area: relative container so copy btn can be positioned inside it
+      const codeArea = document.createElement('div')
+      codeArea.className = 'code-area'
 
       // Inject into DOM
       pre.parentNode?.insertBefore(wrapper, pre)
-      wrapper.appendChild(header)
-      wrapper.appendChild(pre)
+      codeArea.appendChild(pre)
+      codeArea.appendChild(copyBtn)
+      wrapper.appendChild(codeArea)
     })
   }, [html])
 

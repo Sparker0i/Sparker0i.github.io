@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getAllPosts } from '@/lib/posts'
 
 const experience = [
   {
@@ -35,12 +36,11 @@ const experience = [
 ]
 
 const skills = [
-  { category: 'Languages',  items: 'Go, Scala, JavaScript / TypeScript, SQL' },
-  { category: 'Frameworks', items: 'gRPC, REST, Django, React, Vue.js' },
-  { category: 'Cloud & Infra', items: 'Azure (AKS, Cosmos), AWS (EC2, EKS), Terraform, Redis, Docker' },
-  { category: 'Databases',  items: 'MySQL, MongoDB, DB2' },
-  { category: 'CI/CD',      items: 'Tekton, Jenkins, Codefresh, Docker' },
-  { category: 'Domains',    items: 'Distributed Systems, Microservices, Event-Driven Architecture, API Design' },
+  { category: 'Languages',    items: ['Go', 'Python', 'TypeScript', 'SQL'] },
+  { category: 'Frameworks',   items: ['gRPC', 'REST', 'GraphQL', 'Django', 'React', 'Vue.js'] },
+  { category: 'Cloud & Infra', items: ['GCP', 'Kubernetes', 'Terraform', 'Redis', 'Docker'] },
+  { category: 'Databases',    items: ['PostgreSQL', 'BigQuery', 'MySQL'] },
+  { category: 'Domains',      items: ['Distributed Systems', 'Microservices', 'Event-Driven Architecture', 'API Design', 'Data Pipelines'] },
 ]
 
 const timeline = [
@@ -59,6 +59,8 @@ const projects = [
 ]
 
 export default function Home() {
+  const recentPosts = getAllPosts().slice(0, 3)
+
   return (
     <>
       {/* ══════════════════════════════════════════════
@@ -68,7 +70,7 @@ export default function Home() {
       {/* Top band: line grid + radial glow, name dominant */}
       <section className="relative page-header-bg overflow-hidden border-b border-border">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-bg" />
-        <div className="relative mx-auto max-w-4xl px-6 py-20 md:py-32">
+        <div className="relative mx-auto max-w-5xl px-6 py-20 md:py-32">
           <div className="mb-5 h-0.5 w-10 bg-accent animate-fade-up delay-0" />
           <h1
             className="font-display font-black leading-none tracking-tight text-text-bright animate-fade-up delay-100"
@@ -94,7 +96,7 @@ export default function Home() {
           ABOUT
       ══════════════════════════════════════════════ */}
       <section id="about" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <p className="font-mono text-sm uppercase tracking-widest text-text-muted mb-3">about</p>
           <p className="font-body text-lg leading-relaxed text-text">
             Senior Engineer and Technical Lead with 7 years of experience
@@ -117,7 +119,7 @@ export default function Home() {
           EXPERIENCE
       ══════════════════════════════════════════════ */}
       <section id="experience" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
             Experience
           </h2>
@@ -149,23 +151,29 @@ export default function Home() {
           SKILLS
       ══════════════════════════════════════════════ */}
       <section id="skills" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
             Skills
           </h2>
-          <div className="mt-8 overflow-hidden rounded border border-border">
-            <table className="w-full text-sm">
-              <tbody>
-                {skills.map((row, i) => (
-                  <tr key={row.category} className={i % 2 === 0 ? 'bg-surface' : 'bg-surface-elevated'}>
-                    <td className="w-36 px-5 py-3 font-mono text-xs uppercase tracking-wider text-text-muted border-r border-border whitespace-nowrap">
-                      {row.category}
-                    </td>
-                    <td className="px-5 py-3 font-body text-sm text-text">{row.items}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {skills.map((group) => (
+              <div key={group.category}>
+                <p className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-text-muted mb-3">
+                  <span className="inline-block h-2 w-2 rounded-full bg-accent shrink-0" />
+                  {group.category}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-border bg-surface px-3 py-1 font-mono text-xs text-text"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -174,7 +182,7 @@ export default function Home() {
           SELECTED WORK
       ══════════════════════════════════════════════ */}
       <section id="projects" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
             Projects
           </h2>
@@ -190,7 +198,7 @@ export default function Home() {
           TIMELINE
       ══════════════════════════════════════════════ */}
       <section id="timeline" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
             Timeline
           </h2>
@@ -214,7 +222,7 @@ export default function Home() {
           EDUCATION
       ══════════════════════════════════════════════ */}
       <section id="education" className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
             Education
           </h2>
@@ -230,28 +238,52 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          CTA — Open to opportunities
+          BLOG
       ══════════════════════════════════════════════ */}
-      <section id="contact">
-        <div className="mx-auto max-w-4xl px-6 py-16">
-          <div className="rounded border border-border bg-surface p-8">
-            <p className="font-mono text-xs uppercase tracking-widest text-accent mb-3">
-              currently open to
-            </p>
-            <p className="font-body text-base leading-relaxed text-text">
-              Staff / Senior Engineer (IC) roles in platform engineering,
-              distributed systems, and infrastructure at scale.
-              Open to opportunities in the US (H1B), Europe, Remote, and India.
-            </p>
-            <a
-              href="mailto:aaditya@sparker0i.me"
-              className="mt-5 inline-block font-mono text-sm text-accent border border-accent/30 rounded px-4 py-1.5 hover:bg-accent/5 transition-colors"
-            >
-              get in touch →
-            </a>
+      {recentPosts.length > 0 && (
+        <section id="writing" className="border-b border-border">
+          <div className="mx-auto max-w-5xl px-6 py-16">
+            <div className="flex items-baseline justify-between">
+              <h2 className="section-heading font-display text-2xl font-bold text-text-bright">
+                Blog
+              </h2>
+              <Link href="/blog" className="font-mono text-xs text-text-muted hover:text-accent transition-colors">
+                all posts →
+              </Link>
+            </div>
+            <div className="mt-8 divide-y divide-border">
+              {recentPosts.map((post) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group flex flex-col gap-1 py-5 first:pt-0 last:pb-0 hover:opacity-80 transition-opacity"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="font-display text-base font-bold text-text-bright group-hover:text-accent transition-colors">
+                      {post.title}
+                    </span>
+                    <span className="shrink-0 font-mono text-xs text-text-muted">
+                      {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  {post.excerpt && (
+                    <p className="font-body text-sm leading-relaxed text-text-muted line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  )}
+                  {post.tags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {post.tags.map((tag) => (
+                        <span key={tag} className="tag tag-muted">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   )
 }

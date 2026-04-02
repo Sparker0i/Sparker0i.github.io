@@ -27,21 +27,29 @@ export function TableOfContents({ toc, variant }: Props) {
   }, [toc])
 
   const navContent = (
-    <ul className="space-y-1.5">
-      {toc.map((item) => (
-        <li key={item.id} className={item.level === 3 ? 'pl-3' : ''}>
-          <a
-            href={`#${item.id}`}
-            className={`block text-xs leading-snug transition-colors duration-150 font-mono ${
-              activeId === item.id
-                ? 'text-[var(--color-accent)]'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-            }`}
-          >
-            {item.text}
-          </a>
-        </li>
-      ))}
+    <ul className="space-y-0.5">
+      {toc.map((item) => {
+        const isActive = activeId === item.id
+        const isH3 = item.level === 3
+        return (
+          <li key={item.id} className={isH3 ? 'pl-4' : ''}>
+            <a
+              href={`#${item.id}`}
+              className={[
+                'block py-1 leading-snug transition-colors duration-150 font-mono',
+                isH3 ? 'text-[11px]' : 'text-xs',
+                isActive
+                  ? 'text-[var(--color-accent)]'
+                  : isH3
+                  ? 'text-[var(--color-text-muted)] opacity-70 hover:opacity-100 hover:text-[var(--color-text)]'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
+              ].join(' ')}
+            >
+              {item.text}
+            </a>
+          </li>
+        )
+      })}
     </ul>
   )
 
@@ -60,8 +68,8 @@ export function TableOfContents({ toc, variant }: Props) {
   }
 
   return (
-    <aside className="hidden lg:block w-[200px] flex-shrink-0">
-      <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+    <aside className="hidden lg:block w-[200px] flex-shrink-0 sticky top-24">
+      <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
         <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
           On this page
         </p>

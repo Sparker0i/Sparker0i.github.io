@@ -8,6 +8,7 @@ import { PostNavigation } from '@/components/PostNavigation'
 import { ReadingProgress } from '@/components/ReadingProgress'
 import { BackLink } from '@/components/BackLink'
 import { TableOfContents } from '@/components/TableOfContents'
+import DateDisplay from '@/components/DateDisplay'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -46,14 +47,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
   const post = await getPostBySlug(slug)
@@ -84,10 +77,16 @@ export default async function BlogPostPage({ params }: Props) {
             {post.title}
           </h1>
 
-          <div className="mt-5 flex items-center gap-4 font-mono text-xs text-text-muted">
-            <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <div className="mt-5 flex flex-wrap items-center gap-4 font-mono text-xs text-text-muted">
+            <DateDisplay dateStr={post.date} />
             <span>·</span>
             <span>{post.readingTime} min read</span>
+            {post.lastmod && post.lastmod !== post.date && (
+              <>
+                <span>·</span>
+                <span>Updated: <DateDisplay dateStr={post.lastmod} /></span>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -1,18 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllPosts } from '@/lib/posts'
+import DateDisplay from '@/components/DateDisplay'
 
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Technical writing on distributed systems, platform engineering, and Go.',
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 export default function BlogPage() {
@@ -67,7 +60,7 @@ export default function BlogPage() {
                   </p>
 
                   <div className="mt-4 flex items-center gap-4 font-mono text-xs text-text-muted">
-                    <time dateTime={post.date}>{formatDate(post.date)}</time>
+                    <DateDisplay dateStr={post.date} />
                     <span>·</span>
                     <span>{post.readingTime} min read</span>
                   </div>

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Mono, Playfair_Display, Source_Serif_4, Bricolage_Grotesque } from 'next/font/google'
+import { IBM_Plex_Mono, Space_Grotesk, Source_Serif_4, Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 import { Nav } from '@/components/Nav'
+import { SearchDialog } from '@/components/SearchDialog'
+import { getAllPosts } from '@/lib/posts'
 
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -10,9 +12,9 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: 'swap'
 })
 
-const playfairDisplay = Playfair_Display({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['700', '900'],
+  weight: ['700'],
   variable: '--font-display',
   display: 'swap',
 })
@@ -51,13 +53,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const posts = getAllPosts()
+
   return (
     <html
       lang="en"
-      className={`${playfairDisplay.variable} ${ibmPlexMono.variable} ${sourceSerif4.variable} ${bricolageGrotesque.variable}`}
+      className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${sourceSerif4.variable} ${bricolageGrotesque.variable}`}
     >
       <body>
         <Nav />
+        <SearchDialog posts={posts} />
         <main>{children}</main>
       </body>
     </html>
