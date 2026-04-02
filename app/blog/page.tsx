@@ -35,35 +35,19 @@ export default function BlogPage() {
         ) : (
           <ul className="space-y-0">
             {posts.map((post) => (
-              <li key={post.slug} className="border-b border-border last:border-b-0 py-8">
-                <div className="flex flex-wrap items-center gap-3 mb-3">
-                  {post.draft && (
-                    <span className="tag tag-amber">draft</span>
-                  )}
-                  {post.tags.map((tag) => (
-                    <Link key={tag} href={`/blog/tag/${tag}`} className="tag tag-green">
-                      {tag}
-                    </Link>
-                  ))}
-                </div>
-
+              <li key={post.slug} className="py-6">
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group block"
+                  className="group flex flex-col gap-1.5 hover:opacity-80 transition-opacity"
                 >
+                  <span className="font-mono text-xs text-text-muted">
+                    <DateDisplay dateStr={post.date} />
+                    {' · '}
+                    {post.readingTime} min read
+                  </span>
                   <h2 className="font-display text-xl font-bold text-text-bright group-hover:text-accent transition-colors duration-150 md:text-2xl">
                     {post.title}
                   </h2>
-
-                  <p className="mt-2 font-body text-sm leading-relaxed text-text-muted">
-                    {post.excerpt}
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-4 font-mono text-xs text-text-muted">
-                    <DateDisplay dateStr={post.date} />
-                    <span>·</span>
-                    <span>{post.readingTime} min read</span>
-                  </div>
                 </Link>
               </li>
             ))}
