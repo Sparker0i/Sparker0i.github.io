@@ -271,6 +271,10 @@ pre.shiki .highlighted {
 }
 
 /* Keep pre/shiki blocks clean inside prose */
+.prose img {
+  cursor: zoom-in;
+}
+
 .prose pre {
   background: transparent;
   padding: 0;
