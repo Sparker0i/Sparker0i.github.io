@@ -35,6 +35,7 @@ const sourceSerif4 = Source_Serif_4({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sparker0i.me'),
   title: {
     default: 'Aaditya Menon — Senior Engineer & Technical Lead',
     template: '%s — Aaditya Menon',

@@ -1,9 +1,14 @@
 import { ImageResponse } from 'next/og'
-import { getPostBySlug } from '@/lib/posts'
+import { getAllPosts, getPostBySlug } from '@/lib/posts'
 
+export const dynamic = 'force-static'
 export const alt = 'Blog post preview'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
+
+export function generateStaticParams() {
+  return getAllPosts().map((post) => ({ slug: post.slug }))
+}
 
 export default async function OGImage({
   params,

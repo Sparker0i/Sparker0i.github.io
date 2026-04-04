@@ -55,63 +55,67 @@ export default async function BlogPostPage({ params }: Props) {
 
   const { prev, next } = getAdjacentPosts(slug)
 
+  const hasToc = post.toc.length > 2
+
   return (
     <>
       <ReadingProgress />
 
       {/* ─── Post header ───────────────────────────── */}
       <div className="page-header-bg border-b border-border">
-        <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-          <BackLink />
+        <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
+          <div className={hasToc ? 'lg:flex lg:gap-14' : undefined}>
+            <div className={hasToc ? 'min-w-0 flex-1' : undefined}>
+              <BackLink />
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {post.draft && <span className="tag tag-amber">draft</span>}
-            {post.tags.map((tag) => (
-              <Link key={tag} href={`/blog/tag/${tag}`} className="tag tag-green">
-                {tag}
-              </Link>
-            ))}
-          </div>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {post.draft && <span className="tag tag-amber">draft</span>}
+                {post.tags.map((tag) => (
+                  <Link key={tag} href={`/blog/tag/${tag}`} className="tag tag-green">
+                    {tag}
+                  </Link>
+                ))}
+              </div>
 
-          <h1 className="mt-4 font-display text-3xl font-black leading-tight text-text-bright md:text-4xl lg:text-5xl">
-            {post.title}
-          </h1>
+              <h1 className="mt-4 font-display text-3xl font-black leading-tight text-text-bright md:text-4xl lg:text-5xl">
+                {post.title}
+              </h1>
 
-          <div className="mt-5 flex flex-wrap items-center gap-4 font-mono text-xs text-text-muted">
-            <DateDisplay dateStr={post.date} />
-            <span>·</span>
-            <span>{post.readingTime} min read · ~{post.wordCount.toLocaleString()} words</span>
-            {post.lastmod && post.lastmod !== post.date && (
-              <>
+              <div className="mt-5 flex flex-wrap items-center gap-4 font-mono text-xs text-text-muted">
+                <DateDisplay dateStr={post.date} />
                 <span>·</span>
-                <span>Updated: <DateDisplay dateStr={post.lastmod} /></span>
-              </>
-            )}
+                <span>{post.readingTime} min read · ~{post.wordCount.toLocaleString()} words</span>
+                {post.lastmod && post.lastmod !== post.date && (
+                  <>
+                    <span>·</span>
+                    <span>Updated: <DateDisplay dateStr={post.lastmod} /></span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {hasToc && <div className="hidden lg:block w-[200px] flex-shrink-0" />}
           </div>
         </div>
       </div>
 
-      {/* ─── Hero image ────────────────────────────── */}
-      {post.image && (
-        <div className="mx-auto max-w-3xl px-6 pt-10">
-          <div className="relative aspect-[1200/630] w-full overflow-hidden rounded-lg border border-border">
-            <Image
-              src={post.image}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-        </div>
-      )}
-
       {/* ─── Post body ─────────────────────────────── */}
       <div className="mx-auto max-w-5xl px-6 py-14">
-        {post.toc.length > 2 ? (
+        {hasToc ? (
           <div className="lg:flex lg:gap-14 lg:items-start">
             <div className="min-w-0 flex-1">
               <TableOfContents toc={post.toc} variant="mobile" />
+              {post.image && (
+                <div className="relative aspect-[1200/630] w-full overflow-hidden rounded-lg border border-border mb-10">
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              )}
               <PostContent html={post.htmlContent} />
               <div className="mt-16 border-t border-border pt-8">
                 <BackLink />
@@ -122,6 +126,17 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         ) : (
           <>
+            {post.image && (
+              <div className="relative aspect-[1200/630] w-full overflow-hidden rounded-lg border border-border mb-10">
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            )}
             <PostContent html={post.htmlContent} />
             <div className="mt-16 border-t border-border pt-8">
               <BackLink />
