@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Mono, DM_Sans, Source_Serif_4, Bricolage_Grotesque } from 'next/font/google'
+import { IBM_Plex_Mono, DM_Sans, Lora, Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 import { Nav } from '@/components/Nav'
 import { SearchDialog } from '@/components/SearchDialog'
@@ -26,9 +26,9 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: 'swap',
 })
 
-const sourceSerif4 = Source_Serif_4({
+const lora = Lora({
   subsets: ['latin'],
-  weight: ['300', '400'],
+  weight: ['400'],
   style: ['normal', 'italic'],
   variable: '--font-body',
   display: 'swap',
@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${ibmPlexMono.variable} ${sourceSerif4.variable} ${bricolageGrotesque.variable}`}
+      className={`${dmSans.variable} ${ibmPlexMono.variable} ${lora.variable} ${bricolageGrotesque.variable}`}
     >
       <body>
         <Nav />
