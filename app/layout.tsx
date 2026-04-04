@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { IBM_Plex_Mono, Space_Grotesk, Source_Serif_4, Bricolage_Grotesque } from 'next/font/google'
+import { IBM_Plex_Mono, DM_Sans, Source_Serif_4, Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 import { Nav } from '@/components/Nav'
 import { SearchDialog } from '@/components/SearchDialog'
@@ -12,7 +12,7 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: 'swap'
 })
 
-const spaceGrotesk = Space_Grotesk({
+const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['700'],
   variable: '--font-display',
@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${sourceSerif4.variable} ${bricolageGrotesque.variable}`}
+      className={`${dmSans.variable} ${ibmPlexMono.variable} ${sourceSerif4.variable} ${bricolageGrotesque.variable}`}
     >
       <body>
         <Nav />
