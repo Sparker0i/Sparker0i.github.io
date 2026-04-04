@@ -15,7 +15,7 @@ export default function BlogPage() {
     <>
       {/* ─── Page header ───────────────────────────── */}
       <div className="page-header-bg border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-16 md:py-24">
+        <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
           <p className="font-mono text-xs uppercase tracking-widest text-text-muted">
             writing
           </p>
@@ -29,7 +29,7 @@ export default function BlogPage() {
       </div>
 
       {/* ─── Post listing ──────────────────────────── */}
-      <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mx-auto max-w-5xl px-6 py-12">
         {posts.length === 0 ? (
           <p className="font-mono text-sm text-text-muted">No posts yet.</p>
         ) : (
