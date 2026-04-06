@@ -9,6 +9,7 @@ import { ReadingProgress } from '@/components/ReadingProgress'
 import { BackLink } from '@/components/BackLink'
 import { TableOfContents } from '@/components/TableOfContents'
 import DateDisplay from '@/components/DateDisplay'
+import { GiscusComments } from '@/components/GiscusComments'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -121,6 +122,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <BackLink />
               </div>
               <PostNavigation prev={prev} next={next} />
+              <GiscusComments />
             </div>
             <TableOfContents toc={post.toc} variant="desktop" />
           </div>
@@ -142,6 +144,7 @@ export default async function BlogPostPage({ params }: Props) {
               <BackLink />
             </div>
             <PostNavigation prev={prev} next={next} />
+            <GiscusComments />
           </>
         )}
       </div>
