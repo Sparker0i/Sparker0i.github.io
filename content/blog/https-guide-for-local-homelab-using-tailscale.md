@@ -1,18 +1,19 @@
 ---
-title: "The Local HTTPS Guide You NEED to Know for your homelab"
-date: "2026-03-29T04:20:59.000Z"
+title: "How I Replaced Port Numbers with HTTPS Subdomains on My Homelab"
+date: "2026-04-07T19:20:59.000Z"
 tags: ["Homelab", "Self-Hosted", "Docker", "Tailscale", "Security"]
 excerpt: "Stop exposing raw ports and serve your self-hosted applications over a clean, trusted HTTPS domain in under 20 minutes."
 draft: true
-image: ""
-lastmod: "2024-04-14T18:19:17.169Z"
+image: "/images/blog/https-guide-for-local-homelab-using-tailscale/architecture-diagram.png"
 ---
 
-I run Immich on a home server. If you're not familiar, Immich is a self-hosted alternative to Google Photos - open source, fast, and does a surprisingly good job of replacing the real thing.
+I [run Immich](/blog/immich-gpu-acceleration-podman) on a home server. If you're not familiar, Immich is a self-hosted alternative to Google Photos - open source, fast, and does a surprisingly good job of replacing the real thing.
 
 The problem is that by default, Immich binds to port 2283 on every network interface. So if you're on Tailscale with the server, you'd just go to `server-blr:2283` and you're in. No HTTPS, no clean URL, nothing. It works, but it feels wrong.
 
-There are a few reasons you'd want to fix this. The obvious one is HTTPS - without it, your photos are travelling over plain HTTP on your local network, and browsers will keep flagging it as insecure. The less obvious one is that raw port access is just messy: you're handing out hostnames and port numbers to every device you add, and if you ever want to put any kind of access control in front of Immich, a proper reverse proxy is the right place to do that. A clean URL like `https://immich.server.sparker0i.me` also makes it a lot easier to share access with family members without explaining what a port number is.
+There are a few reasons you'd want to fix this. The obvious one is HTTPS - without it, your photos are travelling over plain HTTP on your local network, and browsers will keep flagging it as insecure. The less obvious one is that raw port access is just messy: you're handing out hostnames and port numbers to every device you add, and if you ever want to put any kind of access control in front of Immich, a proper reverse proxy is the right place to do that. 
+
+A clean URL like `https://immich.server.sparker0i.me` also makes it a lot easier to share access with family members without explaining what a port number is.
 
 I wanted to access it via `https://immich.server.sparker0i.me` and have everything else - direct port access, raw IP - blocked entirely. Here's how I did it.
 
@@ -38,13 +39,15 @@ The idea is simple:
 3. Create a proxy host in NPM pointing at the Immich container
 4. Point the subdomain DNS at my Tailscale IP so it's only reachable on the Tailnet
 
-That's it. NPM talks to Immich over Docker's internal network. Nobody outside the host ever sees port 2283.
+That's it. NPM talks to Immich over Docker's internal network. Nobody outside the host ever sees port 2283. This is what the overall flow would look like:
+
+![](/images/blog/https-guide-for-local-homelab-using-tailscale/architecture-diagram.png)
 
 ---
 
-### Bind Immich to Localhost Only
+### Install Immich and bind to Localhost Only
 
-This is the most important change. In the Immich `docker-compose.yml`, change:
+Install immich by following instructions from this [page](https://docs.immich.app/install/docker-compose). Then inside Immich's `docker-compose.yml`, change:
 
 ```yaml
 ports:
@@ -65,6 +68,32 @@ Restart after this:
 ```bash
 docker compose down && docker compose up -d
 ```
+---
+
+### Install NGINX Proxy Manager (NPM)
+
+Create a folder to store the `docker-compose.yaml` file for NPM and then populate the file with this data:
+
+```yaml
+services:
+  nginx_proxy_manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: always
+    environment:
+      TZ: "Asia/Kolkata"
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data/npm_data:/data
+      - ./data/npm_letsencrypt:/etc/letsencrypt
+      - ./data/npm_logs:/var/log/nginx
+    environment:
+      DB_SQLITE_FILE: "/data/database.sqlite" # Using SQLite instead of MySQL for simplicity
+      INITIAL_ADMIN_EMAIL: admin@xyz.com
+      INITIAL_ADMIN_PASSWORD: password
+```
 
 ---
 
@@ -78,27 +107,33 @@ Create a proper external network once:
 docker network create server
 ```
 
-Then add this to the bottom of **both** compose files:
+Then add the network within your compose files:
 
 ```yaml
+services:
+  <immich-app or nginx_proxy_manager>:
+    networks:
+      - server
+  
+
 networks:
   server:
     external: true
 ```
 
-Now NPM can resolve `immich_server` by container name and reach it at `immich_server:2283` - no host port involved.
+Now NPM can resolve `immich` by container name and reach it at `immich:2283` - no host port involved. This works if your Immich server container name is `immich`. If you haven't provided a container name, then you would need to use `immich_server:2283`.
 
 ---
 
 ### Create the Proxy Host in NPM
 
-Open NPM at `http://server-blr:81` → Proxy Hosts → Add Proxy Host.
+From your server, open NPM at `http://localhost:81` -> Proxy Hosts -> Add Proxy Host.
 
 | Field | Value |
 |---|---|
 | Domain Names | `immich.server.sparker0i.me` |
 | Scheme | `http` |
-| Forward Hostname | `immich_server` |
+| Forward Hostname | `immich` |
 | Forward Port | `2283` |
 | Websockets Support | ✓ Enabled |
 
@@ -108,23 +143,11 @@ On the SSL tab, this is where it gets slightly interesting. Because the domain r
 
 NPM supports DNS challenge via a bunch of providers - Cloudflare, DuckDNS, Route53, Namecheap, and more. The flow is the same regardless of which one you use: NPM creates a temporary `_acme-challenge` TXT record in your DNS, Let's Encrypt verifies it, cert is issued, record is cleaned up. About 30 seconds end to end.
 
-What differs is just how you authenticate with your DNS provider. A couple of examples:
+What differs is just how you authenticate with your DNS provider. In **Cloudflare**, this is how you'd do it:
 
-**Cloudflare**
-
-Go to My Profile → API Tokens → Create Token. Use the "Edit zone DNS" template, scope it to just your zone (`sparker0i.me`). In NPM, select Cloudflare as the provider and paste the token.
-
-**DuckDNS**
-
-Your DuckDNS token is on the dashboard page after you log in. In NPM, select DuckDNS and paste it. Note that DuckDNS only works for subdomains of `duckdns.org` - so this applies if your domain is something like `myserver.duckdns.org` rather than a custom domain.
-
-In NPM's SSL tab:
-
-- Request a new SSL certificate
-- Check "Use a DNS Challenge"
-- Select your provider and paste the relevant token/credential
-
-If you want a wildcard cert that covers all subdomains at once (`*.server.sparker0i.me`), you can request that here too - just use the wildcard as the domain name. Wildcard certs only work with DNS challenges anyway, so you're already set up for it.
+1. Open the cloudflare dashboard, then go to My Profile -> API Tokens -> Create Token. 
+2. Use the "Edit zone DNS" template, scope it to just your zone. 
+3. In NPM, select Cloudflare as the provider and paste the token.
 
 ---
 
@@ -134,31 +157,18 @@ Get the server's Tailscale IP:
 
 ```bash
 tailscale ip -4
-# e.g. 100.64.0.5
+# e.g. 100.115.198.101
 ```
 
 Add an A record with your DNS provider pointing at the Tailscale IP:
 
 | Type | Name | Value |
 |---|---|---|
-| A | `immich.server` | `100.64.0.5` |
+| A | `*.server` | `100.115.198.101` |
 
 If you're on Cloudflare, make sure the proxy status is set to **DNS only** (grey cloud). Cloudflare can't proxy a Tailscale IP, and leaving it on orange cloud will just break things.
 
 Pointing at the Tailscale IP instead of a public IP means the domain only resolves correctly when you're on your Tailnet. If someone outside somehow finds the subdomain, they get a 100.x address they can't reach.
-
----
-
-### Harden with ufw (Optional)
-
-Steps 1–4 are enough. But if you ever accidentally revert that port binding, you're exposed again. Worth adding explicit deny rules:
-
-```bash
-sudo ufw deny in on tailscale0 to any port 2283
-sudo ufw deny in on eth0 to any port 2283
-```
-
-Replace `eth0` with your actual LAN interface. One note: Docker can bypass ufw in some configurations by writing directly to iptables. So the localhost binding in Step 1 is the real protection - ufw is just a backup.
 
 ---
 
@@ -172,7 +182,7 @@ curl -I https://immich.server.sparker0i.me
 
 # Should fail
 curl -I http://server-blr:2283
-curl -I http://100.64.0.5:2283
+curl -I http://100.115.198.101:2283
 ```
 
 First one returns `HTTP/2 200`. Other two return connection refused.
@@ -193,4 +203,4 @@ Honestly, this took me longer to figure out than it should have. Most guides eit
 
 The localhost port binding is doing the real work here. Everything else - the shared Docker network, the NPM proxy host, the DNS record - is just building on top of that one change. If you take nothing else from this post, take that: `127.0.0.1:2283:2283` instead of `2283:2283`.
 
-The same pattern works for any Docker service in your homelab - Jellyfin, Paperless-ngx, Vaultwarden, whatever. Change the container name and port, add a proxy host, add a DNS record. Done.
+The same pattern works for any Docker service in your homelab - Jellyfin, Vaultwarden, Perplexica etc. Change the container name and port, add a proxy host, add a DNS record. Done.
