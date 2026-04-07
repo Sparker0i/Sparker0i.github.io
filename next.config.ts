@@ -1,3 +1,4 @@
+import path from 'path'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,16 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  webpack(config, { dev }) {
+    if (dev) {
+      config.module.rules.push({
+        test: /lib[/\\]posts\.ts$/,
+        use: [{ loader: path.resolve('./lib/content-loader.js') }],
+        enforce: 'pre',
+      })
+    }
+    return config
+  },
 }
 
 export default nextConfig

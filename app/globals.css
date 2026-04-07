@@ -235,8 +235,7 @@ pre.shiki .highlighted {
 }
 
 .prose strong {
-  color: var(--color-text-bright);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .prose h2 {
