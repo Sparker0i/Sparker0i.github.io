@@ -3,7 +3,6 @@ title: "How I Replaced Port Numbers with HTTPS Subdomains on My Homelab"
 date: "2026-04-07T19:20:59.000Z"
 tags: ["Homelab", "Self-Hosted", "Docker", "Tailscale", "Security"]
 excerpt: "Stop exposing raw ports and serve your self-hosted applications over a clean, trusted HTTPS domain in under 20 minutes."
-draft: true
 image: "/images/blog/https-guide-for-local-homelab-using-tailscale/architecture-diagram.png"
 ---
 
