@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { createRoot } from 'react-dom/client'
+import { InstagramPost } from './InstagramPost'
 
 interface PostContentProps {
   html: string
@@ -80,6 +82,33 @@ export function PostContent({ html }: PostContentProps) {
 
     return () => container.removeEventListener('click', handleClick)
   }, [html, openLightbox])
+
+  // Handle Instagram embeds
+  useEffect(() => {
+    const container = ref.current
+    if (!container) return
+
+    const instagramEmbeds = container.querySelectorAll<HTMLDivElement>('[data-instagram-embed]')
+    const roots: Map<HTMLDivElement, ReturnType<typeof createRoot>> = new Map()
+
+    instagramEmbeds.forEach((embed) => {
+      const postId = embed.getAttribute('data-instagram-embed')
+      if (!postId) return
+
+      // Clear the existing content
+      embed.innerHTML = ''
+
+      // Create a root and render the InstagramPost component
+      const root = createRoot(embed)
+      root.render(<InstagramPost postId={postId} />)
+      roots.set(embed, root)
+    })
+
+    // Cleanup
+    return () => {
+      roots.forEach((root) => root.unmount())
+    }
+  }, [html])
 
   // Close on Escape
   useEffect(() => {

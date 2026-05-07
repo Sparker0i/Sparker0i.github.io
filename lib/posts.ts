@@ -168,6 +168,51 @@ function remarkCodeMeta() {
   }
 }
 
+/**
+ * Remark plugin: converts Hugo Instagram shortcodes {{< instagram ID >}}
+ * to a special data attribute marker that PostContent can hydrate.
+ */
+function remarkInstagramShortcode() {
+  return (tree: { type: string; children?: unknown[] }) => {
+    const visit = (node: {
+      type: string
+      value?: string
+      children?: unknown[]
+      [key: string]: unknown
+    }) => {
+      if (node.type === 'paragraph' && node.children) {
+        const children = node.children as Array<{
+          type: string
+          value?: string
+          [key: string]: unknown
+        }>
+
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i]
+          if (child.type === 'text' && child.value) {
+            const match = child.value.match(/{{<\s*instagram\s+(\w+)\s*>}}/)
+            if (match) {
+              const postId = match[1]
+              // Replace with html node that will be preserved
+              const newNode: typeof child = {
+                type: 'html',
+                value: `<div data-instagram-embed="${postId}"></div>`,
+              }
+              children[i] = newNode
+            }
+          }
+        }
+      }
+
+      if (Array.isArray(node.children)) {
+        node.children.forEach((child) => visit(child as Parameters<typeof visit>[0]))
+      }
+    }
+
+    visit(tree as Parameters<typeof visit>[0])
+  }
+}
+
 export async function getPostBySlug(slug: string): Promise<PostWithContent | null> {
   const filePath = path.join(BLOG_DIR, `${slug}.md`)
   if (!fs.existsSync(filePath)) return null
@@ -184,6 +229,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkCodeMeta)
+    .use(remarkInstagramShortcode)
     .use(makeRemarkExtractHeadings(toc))
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeAddHeadingIds)
